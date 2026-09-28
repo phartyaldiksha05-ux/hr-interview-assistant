@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.env
+.env.local
+node_modules/
+dist/
+.vite/
+backend/uploads/*
+!backend/uploads/.gitkeep
+.vscode/
+.idea/
+.DS_Store
