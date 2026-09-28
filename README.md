@@ -1,165 +1,127 @@
-# Meetwise AI — AI-Powered HR Interview Assistant
+# Meetwise AI — HR Interview Assistant
 
-**An AI-assisted workspace for managing candidates, preparing interviews and simplifying recruitment coordination.**
+**An AI-assisted workspace for organizing candidates, preparing interviews, and keeping hiring workflows in one place.**
 
-Meetwise AI helps HR professionals organize candidate information, analyze resumes, prepare interview questions, schedule interviews and manage follow-ups from one workspace.
+[**Live Application**](https://hr-interview-assistant-six.vercel.app/) · [**Backend API Documentation**](https://hr-interview-assistant.onrender.com/docs) · [**GitHub Repository**](https://github.com/phartyaldiksha05-ux/hr-interview-assistant)
 
-The goal is to reduce repetitive administrative work while keeping HR professionals in control of hiring decisions.
+> **Project status:** Actively developed by a three-member team. Some features listed in the roadmap are not yet available in the live application.
 
-## Key Features
+## Overview
 
-* **Candidate Management:** Create, view and manage candidate profiles.
-* **Resume Upload & Processing:** Upload PDF resumes and extract relevant information.
-* **AI Candidate Briefing:** Generate structured candidate summaries based on resume content.
-* **AI Interview Questions:** Prepare role-specific, technical, project-based and behavioral questions.
-* **Interview Scheduling:** Manage interview dates, interviewers, duration and meeting links.
-* **Smart Reminders:** Coordinate upcoming interviews through scheduled reminders and in-app alerts.
-* **HR Feedback:** Record interview notes and observations.
-* **AI Interview Summaries:** Generate structured summaries from recorded interview feedback.
-* **HR Dashboard:** View candidates, upcoming interviews and pending actions.
+Meetwise AI helps HR teams manage candidates, organize interviews, and use AI to support interview preparation. AI-generated material is intended to assist recruiters—not to make autonomous hiring decisions.
 
-AI-generated content is intended to support human review, not automate final hiring decisions.
+## Current Features
 
-## Tech Stack
+- HR registration and login
+- Candidate management and candidate profiles
+- Resume upload and extraction workflows
+- AI-assisted interview preparation using Groq
+- Interview scheduling, notes, and HR reminder workflows
+- Dashboard for managing hiring activities
 
-| Layer       | Technologies                                |
-| ----------- | ------------------------------------------- |
-| Frontend    | React, Vite, JavaScript, CSS                |
-| Backend     | Python, FastAPI                             |
-| Database    | PostgreSQL                                  |
-| ORM         | SQLAlchemy                                  |
-| Migrations  | Alembic                                     |
-| AI          | LLM-powered resume and interview assistance |
-| Scheduling  | APScheduler                                 |
-| Development | Docker, Git, GitHub                         |
+**Note:** The team is reviewing and testing existing workflows end to end. A listed feature may still be under improvement.
 
-## Application Workflow
+## Live Deployment
 
-1. HR creates a candidate profile and uploads a resume.
-2. Meetwise extracts resume information and prepares an AI-assisted candidate briefing.
-3. HR reviews the briefing and generates relevant interview questions.
-4. HR schedules an interview and configures reminders.
-5. During or after the interview, HR records notes and feedback.
-6. Meetwise generates a structured post-interview summary for HR to review.
+| Component | Platform | Link |
+| --- | --- | --- |
+| Frontend | Vercel | [Open Meetwise AI](https://hr-interview-assistant-six.vercel.app/) |
+| Backend | Render | [API Documentation](https://hr-interview-assistant.onrender.com/docs) |
+| Database | Neon PostgreSQL | Private; no public database link |
+| Source code | GitHub | [hr-interview-assistant](https://github.com/phartyaldiksha05-ux/hr-interview-assistant) |
 
-## Project Structure
+The Render Free instance may take time to respond after inactivity.
 
-```text
-hr-interview-assistant/
-├── backend/
-│   ├── app/
-│   │   ├── ai/
-│   │   ├── api/
-│   │   ├── core/
-│   │   ├── db/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   └── workers/
-│   ├── alembic/
-│   ├── tests/
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── api/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   └── styles/
-│   └── package.json
-├── docker-compose.yml
-└── README.md
-```
+## Technology Stack
 
-## Getting Started
+| Layer | Technology |
+| --- | --- |
+| Frontend | React, Vite |
+| Backend | Python, FastAPI |
+| Database | PostgreSQL, SQLAlchemy, Alembic |
+| AI | Groq API |
+| Authentication | JWT, bcrypt |
+| Scheduling | APScheduler (current implementation) |
+| Hosting | Vercel, Render, Neon |
+| Planned email delivery | Resend or another transactional email provider |
+
+## Team
+
+| Member | Role | Responsibilities |
+| --- | --- | --- |
+| **Diksha Phartyal** | AI & Backend Lead | AI workflows, backend integration, database migrations, deployment, and end-to-end testing |
+| **Anjali** | Authentication & Security | Email OTP verification, account security, password reset, and authentication tests |
+| **Siddharth** | Interview Emails & HR Reminders | Candidate interview emails, rescheduling/cancellation messages, HR-only reminders, and delivery tests |
+
+Responsibilities describe the next development phase and may evolve as the project progresses.
+
+## Development Roadmap
+
+- [ ] Verify HR email ownership during registration using OTP
+- [ ] Add OTP expiry, retry limits, and resend cooldown
+- [ ] Implement secure password reset
+- [ ] Send candidates interview invitation emails
+- [ ] Send candidates rescheduling and cancellation emails
+- [ ] Keep interview reminders exclusive to HR
+- [ ] Improve reliability of scheduled HR reminders
+- [ ] Move private resume files to persistent, access-controlled storage
+- [ ] Complete end-to-end regression and security testing
+
+**Notification policy:** Candidates receive interview-related emails only; scheduled reminders are for HR users.
+
+## Run Locally
 
 ### Prerequisites
 
-Python, Node.js, npm, Docker and Git.
+- Python 3.11
+- Node.js and npm
+- A PostgreSQL database
+- Required environment variables for database access, authentication, and AI services
 
-### 1. Clone the repository
+### Backend
 
 ```bash
-git clone https://github.com/phartyaldiksha05-ux/hr-interview-assistant.git
-cd hr-interview-assistant
-```
-
-### 2. Configure the backend
-
-```powershell
 cd backend
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+# Windows PowerShell:
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-
-Copy `backend/.env.example` to `backend/.env` and configure your local database, authentication secret and required AI API credentials.
-
-Never commit real API keys or passwords.
-
-### 3. Start PostgreSQL
-
-From the project root:
-
-```powershell
-docker compose up -d
-```
-
-### 4. Run database migrations and backend
-
-From the backend directory:
-
-```powershell
 alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload
 ```
 
-API documentation: http://localhost:8000/docs
+Create a local backend `.env` using the configuration variables expected by the application. Do not commit `.env` or API keys.
 
-### 5. Start the frontend
+### Frontend
 
-Open another terminal:
+In another terminal:
 
-```powershell
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173 in your browser.
+Configure the frontend's `VITE_API_BASE_URL` to match the backend API base path used by the frontend API client.
 
-## Deployment
+## GitHub Collaboration
 
-The planned production architecture uses:
+Each team member works on a separate feature branch and opens a pull request into `main`:
 
-* **Vercel:** React frontend
-* **Render:** FastAPI backend
-* **Neon:** Managed PostgreSQL
-* **Persistent object storage:** Private resume files
+- `feature/ai-backend` — Diksha
+- `feature/auth-otp` — Anjali
+- `feature/interview-emails` — Siddharth
 
-Production deployment requires secure environment variables, database migrations, persistent file storage and reliable background scheduling.
+Before merging, review the code, run relevant tests, and check that existing candidate and interview workflows still work. Coordinate changes to shared email utilities and database migrations to avoid merge conflicts.
 
-## Development Status
+## Security & Privacy
 
-Meetwise AI is an actively developed portfolio project. Its candidate management, AI preparation, interview coordination and reminder workflows are being tested and refined.
+- Never commit `.env` files, passwords, database URLs, API keys, or JWT secrets.
+- Use test candidate data during development.
+- Limit access to resumes and candidate information to authorized HR users.
+- Do not automatically send internal interview notes or AI assessments to candidates.
+- Obtain HR confirmation before sending candidate interview emails.
 
-Production deployment and complete end-to-end verification are planned.
+## License
 
-## Future Improvements
-
-* Google Calendar and Outlook integration
-* Email-based interview notifications
-* Improved interview analytics
-* Role-based access control
-* Production-grade background notification delivery
-
-## Author
-
-**Diksha Phartyal**
-MCA Graduate | AI & Backend Developer
-
-[GitHub](https://github.com/phartyaldiksha05-ux) · [LinkedIn](https://linkedin.com/in/diksha-phartyal-818357354) · [Portfolio](https://diksha-portfolio-website-omega.vercel.app/)
-
----
-
-Built to make interview preparation and recruitment coordination more organized, efficient and human-centered.
+No license has been specified yet. Please contact the project maintainers before reusing the source code.
