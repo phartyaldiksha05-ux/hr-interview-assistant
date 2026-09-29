@@ -63,7 +63,15 @@ function SummaryPanel({ candidateId, hasResume }) {
                 {(summary.technical_skills ?? summary.skills ?? summary.relevant_technologies).map((skill, i) => {
                   const name = typeof skill === "string" ? skill : skill.name;
                   const evidence = typeof skill === "string" ? null : skill.evidence;
-                  return <span key={`${name}-${i}`} style={styles.skillChip} title={evidence ?? undefined}>{name}{evidence && <small style={styles.evidenceText}> · {evidence}</small>}</span>;
+                  return (
+  <span
+    key={`${name}-${i}`}
+    style={styles.skillChip}
+    title={evidence ?? undefined}
+  >
+    {name}
+  </span>
+);
                 })}
               </div>
             </div>
@@ -77,7 +85,20 @@ function SummaryPanel({ candidateId, hasResume }) {
           {summary.strengths?.length > 0 && (
             <div>
               <div style={styles.blockLabel}>Strengths</div>
-              <ul style={styles.list}>{summary.strengths.map((item, i) => <li key={i}>{typeof item === "string" ? item : <>{item.claim}<div style={styles.evidenceQuote}>Supported by resume: “{item.evidence_quote}”</div></>}</li>)}</ul>
+              <ul style={styles.list}>
+                {summary.strengths.map((item, i) => (
+                  <li key={i}>
+                    {typeof item === "string" ? item : (
+                      <>
+                        {item.claim}
+                        {typeof item.evidence_quote === "string" && item.evidence_quote.trim() && (
+                          <div style={styles.evidenceQuote}>Supported by resume: “{item.evidence_quote}”</div>
+                        )}
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
           {(summary.suggested_interview_areas?.length > 0 || summary.interview_focus_areas?.length > 0) && (
@@ -168,13 +189,58 @@ function CandidateQuestionsPanel({ candidate }) {
       {(error || generationError || loadError) && <p style={s.errorText} role="alert">{error ?? generationError ?? loadError}</p>}
       {loadError && <button type="button" onClick={refetch} style={s.buttonSecondary}>Retry loading questions</button>}
       {!loading && draft.length === 0 && !error && !generationError && <p style={s.emptyState}>Generate technical, project-based, behavioral, and role-specific questions from the resume and target role.</p>}
-      {draft.map((question, index) => (
-        <div key={`${index}-${question.category}`} style={styles.questionRow}>
-          <label style={styles.questionEditLabel}>Category<select value={question.category} onChange={(event) => updateQuestion(index, "category", event.target.value)}><option value="technical">Technical</option><option value="project">Project-based</option><option value="behavioral">Behavioral</option><option value="role_specific">Role-specific</option></select></label>
-          <label style={styles.questionEditLabel}>Question<textarea rows={2} value={question.question_text} onChange={(event) => updateQuestion(index, "question_text", event.target.value)} /></label>
-          <label style={styles.questionEditLabel}>Resume-grounded rationale<textarea rows={2} value={question.rationale ?? ""} onChange={(event) => updateQuestion(index, "rationale", event.target.value)} /></label>
-        </div>
-      ))}
+      <div style={styles.questionsList}>
+        {draft.map((question, index) => (
+    <div
+      key={`${index}-${question.category}`}
+      style={styles.questionCard}
+    >
+      <div style={styles.questionHeader}>
+        <strong>Question {index + 1}</strong>
+
+        <select
+          aria-label={`Category for question ${index + 1}`}
+          value={question.category}
+          onChange={(event) =>
+            updateQuestion(index, "category", event.target.value)
+          }
+          style={styles.categorySelect}
+        >
+          <option value="technical">Technical</option>
+          <option value="project">Project-based</option>
+          <option value="behavioral">Behavioral</option>
+          <option value="role_specific">Role-specific</option>
+        </select>
+      </div>
+
+      <label style={styles.questionField}>
+        <span style={styles.fieldLabel}>Interview question</span>
+        <textarea
+          rows={3}
+          value={question.question_text}
+          onChange={(event) =>
+            updateQuestion(index, "question_text", event.target.value)
+          }
+          style={styles.questionTextarea}
+        />
+      </label>
+
+      <label style={styles.questionField}>
+        <span style={styles.fieldLabel}>
+          Resume-grounded rationale
+        </span>
+        <textarea
+          rows={3}
+          value={question.rationale ?? ""}
+          onChange={(event) =>
+            updateQuestion(index, "rationale", event.target.value)
+          }
+          style={styles.questionTextarea}
+        />
+      </label>
+    </div>
+        ))}
+      </div>
       {draft.length > 0 && <button type="button" onClick={saveQuestions} disabled={!dirty || saving} style={{ ...s.buttonPrimary, marginTop: 12 }}>{saving ? "Saving reviewed questions…" : "Save reviewed questions"}</button>}
     </div>
   );
@@ -337,22 +403,25 @@ export default function CandidateDetail() {
 }
 
 const styles = {
-  backLink: { color: color.textLow, fontSize: 13.5, textDecoration: "none", display: "inline-block", marginBottom: 14 },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 },
-  grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
-  panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
-  blockLabel: { fontSize: 12, color: color.textLow, fontWeight: 600, marginBottom: 4 },
-  skillChip: { fontSize: 12.5, background: color.neutralSoft, color: color.textMid, padding: "3px 10px", borderRadius: 999 },
-  evidenceText: { display: "block", marginTop: 3, fontSize: 10, color: color.textLow },
-  evidenceQuote: { marginTop: 3, color: color.textLow, fontSize: 12, fontStyle: "italic" },
-  list: { margin: 0, paddingLeft: 18, fontSize: 14 },
-  interviewRow: {
-    display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "10px 0", borderBottom: `1px solid ${color.border}`, textDecoration: "none", color: "inherit",
-  },
-  noteItem: { padding: "11px 0", borderTop: `1px solid ${color.border}` },
-  noteMeta: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, fontSize: 11, color: color.textLow },
-  noteInterview: { color: color.accentText, fontWeight: 600, textDecoration: "none" },
-  noteContent: { margin: "8px 0", color: color.textHigh, fontSize: 13.5, lineHeight: 1.55, whiteSpace: "pre-wrap" },
-  noteTags: { display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: color.textMid },
+  backLink: { display: "inline-block", marginBottom: 18, color: color.ink, textDecoration: "none", fontSize: 13, fontWeight: 600 },
+  header: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 24 },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 350px), 1fr))", gap: 18 },
+  panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 },
+  blockLabel: { color: color.textMid, fontSize: 13, fontWeight: 700, marginBottom: 10 },
+  skillChip: { display: "inline-flex", alignItems: "center", padding: "6px 10px", border: `1px solid ${color.border}`, borderRadius: 8, background: color.canvas, color: color.textHigh, fontSize: 12, overflowWrap: "anywhere" },
+  list: { margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 10, fontSize: 13, lineHeight: 1.6 },
+  evidenceQuote: { marginTop: 5, fontSize: 12, lineHeight: 1.5, color: color.textLow, overflowWrap: "anywhere" },
+  interviewRow: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "12px 0", borderBottom: `1px solid ${color.border}`, textDecoration: "none", color: color.textHigh },
+  noteItem: { padding: "12px 0", borderBottom: `1px solid ${color.border}` },
+  noteMeta: { display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", fontSize: 12, color: color.textLow },
+  noteInterview: { color: color.ink, textDecoration: "none", fontWeight: 600 },
+  noteContent: { margin: "8px 0", fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap", overflowWrap: "anywhere" },
+  noteTags: { display: "flex", flexWrap: "wrap", gap: 10, fontSize: 12, color: color.textMid },
+  questionsList: { display: "flex", flexDirection: "column", gap: 18, marginTop: 20 },
+  questionCard: { display: "flex", flexDirection: "column", gap: 16, padding: 20, border: `1px solid ${color.border}`, borderRadius: 12, background: color.canvas },
+  questionHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 },
+  categorySelect: { ...s.input, maxWidth: "100%" },
+  questionField: { display: "flex", flexDirection: "column", gap: 8, width: "100%", minWidth: 0 },
+  fieldLabel: { fontSize: 13, fontWeight: 600, color: color.textMid },
+  questionTextarea: { ...s.input, display: "block", width: "100%", boxSizing: "border-box", minHeight: 90, lineHeight: 1.6, resize: "vertical" },
 };
