@@ -1,3 +1,4 @@
+import ThemeToggle from "../components/ThemeToggle";
 import { Link } from "react-router-dom";
 
 const FEATURES = [
@@ -37,12 +38,12 @@ function Brand({ light = false }) {
 }
 
 const WORKFLOW = [
-  { number: "01", title: "Upload Resume", detail: "Add a candidate's PDF", icon: "↑", tone: "mint" },
-  { number: "02", title: "AI Candidate Briefing", detail: "Review strengths and focus areas", icon: "✳", tone: "lilac" },
-  { number: "03", title: "Schedule Interview", detail: "Choose a time and format", icon: "▦", tone: "peach" },
-  { number: "04", title: "Smart Reminders", detail: "Stay ready for what's next", icon: "◷", tone: "mint" },
-  { number: "05", title: "Interview Questions", detail: "Prepare a thoughtful conversation", icon: "⌕", tone: "lilac" },
-  { number: "06", title: "HR Feedback", detail: "Capture notes and next steps", icon: "✎", tone: "peach" },
+  { number: "01", title: "Upload Resume", detail: "Add a candidate's PDF", icon: "↑", tone: "mint", to: "/candidates" },
+  { number: "02", title: "AI Candidate Briefing", detail: "Review strengths and focus areas", icon: "✳", tone: "lilac", to: "/candidates" },
+  { number: "03", title: "Schedule Interview", detail: "Choose a time and format", icon: "▦", tone: "peach", to: "/interviews" },
+  { number: "04", title: "Smart Reminders", detail: "Stay ready for what's next", icon: "◷", tone: "mint", to: "/dashboard" },
+  { number: "05", title: "Interview Questions", detail: "Prepare a thoughtful conversation", icon: "⌕", tone: "lilac", to: "/candidates" },
+  { number: "06", title: "HR Feedback", detail: "Capture notes and next steps", icon: "✎", tone: "peach", to: "/interviews" },
 ];
 
 function ProductPreview() {
@@ -54,12 +55,12 @@ function ProductPreview() {
       </div>
       <div className="workflow-track" aria-label="Upload Resume, AI Candidate Briefing, Schedule Interview, Smart Reminders, Interview Questions, HR Feedback">
         {WORKFLOW.map((step, index) => (
-          <div className={`workflow-step workflow-step-${step.tone}`} key={step.number}>
+          <Link className={`workflow-step workflow-step-${step.tone}`} key={step.number} to={step.to} aria-label={`${step.title}: ${step.detail}`}>
             <div className="workflow-step-top"><span className="workflow-step-icon">{step.icon}</span><span className="workflow-step-number">{step.number}</span></div>
             <strong>{step.title}</strong>
             <span className="workflow-step-detail">{step.detail}</span>
             {index < WORKFLOW.length - 1 && <span className="workflow-connector" aria-hidden="true">→</span>}
-          </div>
+          </Link>
         ))}
       </div>
       <div className="workflow-preview-footer"><span><i /> From first look to considered feedback</span><span>AI assists. People decide.</span></div>
@@ -78,6 +79,7 @@ export default function Landing() {
           <a href="#how-it-works">How it works</a>
         </nav>
         <div className="site-actions">
+          <ThemeToggle />
           <Link className="site-login" to="/login">Log in</Link>
           <Link className="site-cta" to="/register">Get started <span aria-hidden="true">↗</span></Link>
         </div>

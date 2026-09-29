@@ -4,31 +4,31 @@
  * rather than decorative when it appears.
  */
 export const color = {
-  ink: "#261A3B",
-  inkSoft: "#392C4B",
-  canvas: "#F5F4F7",
-  surface: "#FFFFFF",
-  border: "#E2E4EA",
-  borderStrong: "#C7CBD4",
+  ink: "var(--mw-ink)",
+  inkSoft: "var(--mw-ink-soft)",
+  canvas: "var(--mw-canvas)",
+  surface: "var(--mw-surface)",
+  border: "var(--mw-border)",
+  borderStrong: "var(--mw-border-strong)",
 
-  textHigh: "#292439",
-  textMid: "#514A5C",
-  textLow: "#787281",
-  textOnInk: "#F4F0F8",
-  textOnInkMuted: "#B8AEC6",
+  textHigh: "var(--mw-text-high)",
+  textMid: "var(--mw-text-mid)",
+  textLow: "var(--mw-text-low)",
+  textOnInk: "var(--mw-text-on-ink)",
+  textOnInkMuted: "var(--mw-text-on-ink-muted)",
 
-  accent: "#A5E8C2",
-  accentSoft: "#E6F6EC",
-  accentText: "#507F61",
+  accent: "var(--mw-accent)",
+  accentSoft: "var(--mw-accent-soft)",
+  accentText: "var(--mw-accent-text)",
 
-  alarm: "#D93636",
-  alarmSoft: "#FBEAEA",
+  alarm: "var(--mw-alarm)",
+  alarmSoft: "var(--mw-alarm-soft)",
 
-  success: "#43865F",
-  successSoft: "#E4F5EA",
-  info: "#3054A6",
-  infoSoft: "#E7ECF8",
-  neutralSoft: "#EEF0F3",
+  success: "var(--mw-success)",
+  successSoft: "var(--mw-success-soft)",
+  info: "var(--mw-info)",
+  infoSoft: "var(--mw-info-soft)",
+  neutralSoft: "var(--mw-neutral-soft)",
 };
 
 export const font = {
@@ -81,7 +81,7 @@ export const s = {
     borderRadius: radius.sm,
     border: "none",
     background: color.accent,
-    color: color.ink,
+    color: "#261A3B",
     fontWeight: 600,
     fontSize: 14,
     cursor: "pointer",

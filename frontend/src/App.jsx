@@ -1,3 +1,4 @@
+import ThemeToggle from "./components/ThemeToggle";
 import { NavLink, Navigate, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { useReminderPolling } from "./hooks/useReminderPolling";
@@ -50,7 +51,8 @@ function ProtectedShell() {
       </aside>
 
       <div className="hr-main" style={styles.main}>
-        <header style={styles.topbar}>
+        <header className="hr-topbar" style={styles.topbar}>
+          <ThemeToggle />
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {reminders.length > 0 && <span style={styles.bell}>🔴 {reminders.length} active</span>}
             {permission !== "granted" && permission !== "unsupported" && (
@@ -97,8 +99,8 @@ export default function App() {
 
 const styles = {
   loadingScreen: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: s.page.fontFamily, color: color.textLow },
-  shell: { display: "flex", minHeight: "100vh", fontFamily: s.page.fontFamily, background: color.canvas },
-  sidebar: { width: 228, background: "#261a3b", color: "#f4f0f8", padding: "1.5rem 1rem", flexShrink: 0, display: "flex", flexDirection: "column" },
+  shell: { display: "flex", minHeight: "100vh", fontFamily: s.page.fontFamily, background: "var(--mw-canvas)" },
+  sidebar: { width: 228, background: "var(--mw-sidebar)", color: "#f4f0f8", padding: "1.5rem 1rem", flexShrink: 0, display: "flex", flexDirection: "column" },
   logo: { display: "flex", alignItems: "center", gap: 10, fontWeight: 700, fontSize: 16, letterSpacing: 0, marginBottom: "1.75rem", paddingLeft: 6 },
   logoMark: { width: 28, height: 28, borderRadius: 8, background: "#b4f2d0", color: "#261a3b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 },
   navLink: {
@@ -109,7 +111,7 @@ const styles = {
   sidebarFooter: { marginTop: "auto", paddingTop: "1rem", borderTop: "1px solid #403250" },
   userName: { fontSize: 12, color: "#c1b7cf", padding: "0 6px", marginBottom: 8 },
   logoutButton: { width: "100%", padding: "0.55rem", borderRadius: 6, border: "1px solid #514260", background: "transparent", color: "#d2c9df", cursor: "pointer", fontSize: 12, fontFamily: s.page.fontFamily },
-  topbar: { background: "#fff", borderBottom: `1px solid ${color.border}`, padding: "0.75rem 1.75rem", display: "flex", justifyContent: "flex-end" },
+  topbar: { background: "var(--mw-surface)", borderBottom: `1px solid ${color.border}`, padding: "0.75rem 1.75rem", display: "flex", justifyContent: "flex-end" },
   bell: { background: "#fff0ef", color: color.alarm, padding: "5px 12px", borderRadius: 6, fontSize: 12, fontWeight: 700 },
   content: { flex: 1, padding: "2rem 2.25rem", maxWidth: 1500 },
 };

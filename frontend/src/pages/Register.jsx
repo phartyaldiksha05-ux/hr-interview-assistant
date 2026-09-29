@@ -1,3 +1,4 @@
+import ThemeToggle from "../components/ThemeToggle";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
@@ -35,6 +36,7 @@ export default function Register() {
 
   return (
     <div className="auth-page">
+      <ThemeToggle className="auth-theme-toggle" />
       <Link className="auth-brand" to="/" aria-label="Meetwise home"><span className="brand-symbol"><i /><i /><i /></span>meetwise</Link>
       <div className="auth-layout">
         <section className="auth-story">
