@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: str = ""
     SMTP_FROM_NAME: str = "Meetwise AI HR Interview Assistant"
     SMTP_USE_TLS: bool = True
+    RESEND_API_KEY: str = ""
 
     # Email OTP
     OTP_EXPIRE_MINUTES: int = 10

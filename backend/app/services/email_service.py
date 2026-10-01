@@ -1,5 +1,4 @@
-import smtplib
-from email.message import EmailMessage
+import resend
 
 from app.config import settings
 
@@ -9,19 +8,16 @@ def send_email(
     subject: str,
     body: str,
 ) -> None:
-    message = EmailMessage()
-    message["From"] = f"{settings.SMTP_FROM_NAME} <{settings.SMTP_FROM_EMAIL}>"
-    message["To"] = to_email
-    message["Subject"] = subject
-    message.set_content(body)
+    if not settings.RESEND_API_KEY:
+        raise RuntimeError("RESEND_API_KEY is not configured")
 
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=30) as server:
-        if settings.SMTP_USE_TLS:
-            server.starttls()
+    resend.api_key = settings.RESEND_API_KEY
 
-        server.login(
-            settings.SMTP_USERNAME,
-            settings.SMTP_PASSWORD,
-        )
+    params = {
+        "from": "Meetwise AI HR Interview Assistant <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": subject,
+        "text": body,
+    }
 
-        server.send_message(message)
+    resend.Emails.send(params)
