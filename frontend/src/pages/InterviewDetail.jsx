@@ -354,6 +354,33 @@ function CandidateContextPanel({ candidateId }) {
   );
 }
 
+const actionButtonBase = {
+  minHeight: 40,
+  padding: "0.62rem 1.1rem",
+  borderRadius: 8,
+  fontSize: 13,
+  fontWeight: 650,
+  cursor: "pointer",
+  whiteSpace: "nowrap",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const actionButtonSecondary = {
+  ...actionButtonBase,
+  background: color.surface,
+  color: color.textHigh,
+  border: `1px solid ${color.borderStrong}`,
+};
+
+const actionButtonDanger = {
+  ...actionButtonBase,
+  background: color.surface,
+  color: color.alarm,
+  border: `1px solid ${color.alarm}`,
+};
+
 export default function InterviewDetail() {
   const { id } = useParams();
   const { data: interview, error, loading, refetch } = useApi(() => interviewsApi.get(id), [id]);
@@ -464,16 +491,64 @@ export default function InterviewDetail() {
           ) : (
             <div style={styles.actionRow}>
               {interview.meeting_link && interview.status === "scheduled" && (
-                <a href={interview.meeting_link} target="_blank" rel="noopener noreferrer" style={{ ...s.buttonPrimary, textDecoration: "none", display: "inline-block" }}>
+                <a
+                  href={interview.meeting_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    ...s.buttonPrimary,
+                    background: color.surface,
+                    border: `1px solid ${color.border}`,
+                    color: color.textHigh,
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   Join interview
                 </a>
               )}
+
               {interview.status === "scheduled" && (
                 <>
-                  <button onClick={() => { setNewDateTime(toLocalInputValue(interview.scheduled_at)); setRescheduling(true); }} style={s.buttonSecondary}>Reschedule</button>
-                  <button onClick={() => updateInterviewStatus("completed")} disabled={submitting} style={s.buttonSecondary}>Mark completed</button>
-                  <button onClick={() => updateInterviewStatus("no_show")} disabled={submitting} style={s.buttonSecondary}>Mark no-show</button>
-                  <button onClick={handleCancel} style={s.buttonDanger}>Cancel interview</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewDateTime(toLocalInputValue(interview.scheduled_at));
+                      setRescheduling(true);
+                    }}
+                    style={actionButtonSecondary}
+                  >
+                    Reschedule
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => updateInterviewStatus("completed")}
+                    disabled={submitting}
+                    style={actionButtonSecondary}
+                  >
+                    Mark completed
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => updateInterviewStatus("no_show")}
+                    disabled={submitting}
+                    style={actionButtonSecondary}
+                  >
+                    Mark no-show
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    disabled={submitting}
+                    style={actionButtonDanger}
+                  >
+                    Cancel interview
+                  </button>
                 </>
               )}
             </div>
@@ -497,8 +572,14 @@ const styles = {
   grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 },
   infoRow: { display: "flex", gap: 40, flexWrap: "wrap", marginBottom: 18 },
   blockLabel: { fontSize: 12, color: color.textLow, fontWeight: 600, marginBottom: 4 },
-  actionRow: { display: "flex", gap: 10 },
-  rescheduleForm: { display: "flex", gap: 14, alignItems: "flex-start" },
+  actionRow: {
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    alignItems: "center",
+    paddingTop: 4,
+  },
+  rescheduleForm: { display: "flex", gap: 14, alignItems: "flex-start", flexWrap: "wrap" },
   panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
   questionRow: { padding: "12px 0", borderBottom: `1px solid ${color.border}` },
   questionMeta: { marginBottom: 6 },

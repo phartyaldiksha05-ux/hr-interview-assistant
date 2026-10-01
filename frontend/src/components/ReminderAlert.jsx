@@ -49,11 +49,24 @@ const styles = {
   time: { fontSize: 13.5, color: color.textMid, marginBottom: 12 },
   actions: { display: "flex", gap: 8 },
   joinButton: {
-    padding: "0.45rem 1rem", borderRadius: 6, background: color.ink, color: "#fff",
-    textDecoration: "none", fontSize: 13.5, fontWeight: 600,
-  },
-  dismissButton: {
-    padding: "0.45rem 1rem", borderRadius: 6, border: `1px solid ${color.borderStrong}`,
-    background: "#fff", cursor: "pointer", fontSize: 13.5, fontWeight: 500,
-  },
+  padding: "0.45rem 1rem",
+  borderRadius: 6,
+  background: color.surface,
+  border: `1px solid ${color.borderStrong}`,
+  color: color.ink,
+  textDecoration: "none",
+  fontSize: 13.5,
+  fontWeight: 600,
+},
+
+dismissButton: {
+  padding: "0.45rem 1rem",
+  borderRadius: 6,
+  border: `1px solid ${color.borderStrong}`,
+  background: color.surface,
+  color: color.ink,
+  cursor: "pointer",
+  fontSize: 13.5,
+  fontWeight: 500,
+},
 };

@@ -35,9 +35,12 @@ export function AuthProvider({ children }) {
   }
 
   async function register(email, password, full_name) {
-    await authApi.register({ email, password, full_name });
-    await login(email, password);
-  }
+  return await authApi.register({
+    email,
+    password,
+    full_name,
+  });
+}
 
   function logout() {
     clearToken();
