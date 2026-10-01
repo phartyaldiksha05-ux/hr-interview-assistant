@@ -15,7 +15,7 @@ def send_email(
 
     params = {
         "from": "Meetwise AI HR Interview Assistant <onboarding@resend.dev>",
-        "to": [to_email],
+        "to": ["delivered@resend.dev"],
         "subject": subject,
         "text": body,
     }
