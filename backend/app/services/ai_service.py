@@ -50,7 +50,10 @@ def run_candidate_summary(db: Session, candidate: Candidate) -> AIGeneration:
         db.commit()
         return _record(db, candidate_id=candidate.id, kind="candidate_summary", status="failed", error_message="AI generation is not configured for this workspace.")
     except AIGenerationError as exc:
-        logger.warning("Candidate briefing failed (%s)", type(exc).__name__)
+        logger.error(
+            "Candidate briefing failed: %s",
+            type(exc.__cause__).__name__ if exc.__cause__ else type(exc).__name__,
+        )
         candidate.summary_status = "failed"
         db.commit()
         return _record(db, candidate_id=candidate.id, kind="candidate_summary", status="failed", error_message="The AI provider could not complete the briefing. Retry in a moment.")
@@ -85,7 +88,10 @@ def run_candidate_questions(
         logger.warning("Interview question generation unavailable (%s)", type(exc).__name__)
         return _record(db, interview_id=interview.id if interview else None, candidate_id=candidate.id, kind="interview_questions", status="failed", error_message="AI generation is not configured for this workspace.")
     except AIGenerationError as exc:
-        logger.warning("Interview question generation failed (%s)", type(exc).__name__)
+        logger.error(
+            "Interview question generation failed: %s",
+            type(exc.__cause__).__name__ if exc.__cause__ else type(exc).__name__,
+        )
         return _record(db, interview_id=interview.id if interview else None, candidate_id=candidate.id, kind="interview_questions", status="failed", error_message="The AI provider could not generate questions. Retry in a moment.")
 
 
@@ -132,7 +138,10 @@ def run_post_interview_summary(db: Session, interview: Interview, candidate: Can
         logger.warning("Post-interview summary unavailable (%s)", type(exc).__name__)
         return _record(db, interview_id=interview.id, candidate_id=candidate.id, kind="post_interview_summary", status="failed", error_message="AI generation is not configured for this workspace.")
     except AIGenerationError as exc:
-        logger.warning("Post-interview summary failed (%s)", type(exc).__name__)
+        logger.error(
+            "Post-interview summary failed: %s",
+            type(exc.__cause__).__name__ if exc.__cause__ else type(exc).__name__,
+        )
         return _record(db, interview_id=interview.id, candidate_id=candidate.id, kind="post_interview_summary", status="failed", error_message="The AI provider could not complete the summary. Retry in a moment.")
 
 

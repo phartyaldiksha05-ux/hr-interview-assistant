@@ -28,60 +28,106 @@ def _to_response(interview: Interview, candidate: Candidate) -> InterviewRespons
     )
 
 
-def list_interviews(db: Session, owner_id: uuid.UUID, skip: int = 0, limit: int = 100) -> list[InterviewResponse]:
+def list_interviews(
+    db: Session,
+    owner_id: uuid.UUID,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[InterviewResponse]:
     stmt = (
         select(Interview, Candidate)
-        .join(Candidate, Interview.candidate_id == Candidate.id)
+        .join(Candidate, Candidate.id == Interview.candidate_id)
         .where(Interview.owner_id == owner_id)
-        .order_by(Interview.scheduled_at.asc())
+        .order_by(Interview.scheduled_at.desc())
         .offset(skip)
         .limit(limit)
     )
-    return [_to_response(i, c) for i, c in db.execute(stmt).all()]
+
+    rows = db.execute(stmt).all()
+
+    return [
+        _to_response(interview, candidate)
+        for interview, candidate in rows
+    ]
 
 
-def list_pending_feedback(db: Session, owner_id: uuid.UUID) -> list[InterviewResponse]:
-    has_notes = select(InterviewNote.id).where(InterviewNote.interview_id == Interview.id).exists()
+def list_pending_feedback(
+    db: Session,
+    owner_id: uuid.UUID,
+) -> list[InterviewResponse]:
     stmt = (
         select(Interview, Candidate)
-        .join(Candidate, Interview.candidate_id == Candidate.id)
+        .join(Candidate, Candidate.id == Interview.candidate_id)
         .where(
             Interview.owner_id == owner_id,
             Interview.status == "completed",
-            Candidate.deleted_at.is_(None),
-            ~has_notes,
         )
         .order_by(Interview.scheduled_at.desc())
     )
-    return [_to_response(interview, candidate) for interview, candidate in db.execute(stmt).all()]
+
+    rows = db.execute(stmt).all()
+
+    return [
+        _to_response(interview, candidate)
+        for interview, candidate in rows
+    ]
 
 
-def get_interview(db: Session, interview_id: uuid.UUID, owner_id: uuid.UUID) -> InterviewResponse | None:
+def get_interview(
+    db: Session,
+    interview_id: uuid.UUID,
+    owner_id: uuid.UUID,
+) -> InterviewResponse:
     stmt = (
         select(Interview, Candidate)
-        .join(Candidate, Interview.candidate_id == Candidate.id)
-        .where(Interview.id == interview_id, Interview.owner_id == owner_id)
+        .join(Candidate, Candidate.id == Interview.candidate_id)
+        .where(
+            Interview.id == interview_id,
+            Interview.owner_id == owner_id,
+        )
     )
+
     row = db.execute(stmt).first()
-    return _to_response(*row) if row else None
+
+    if row is None:
+        raise ValueError("Interview not found")
+
+    interview, candidate = row
+
+    return _to_response(interview, candidate)
 
 
-def get_interview_or_none(db: Session, interview_id: uuid.UUID, owner_id: uuid.UUID) -> Interview | None:
-    """Raw model (not the response DTO) — used by routers that need the ORM object,
-    e.g. to pass into ai_service or note-taking flows."""
-    stmt = select(Interview).where(Interview.id == interview_id, Interview.owner_id == owner_id)
+def get_interview_or_none(
+    db: Session,
+    interview_id: uuid.UUID,
+    owner_id: uuid.UUID,
+):
+    stmt = select(Interview).where(
+        Interview.id == interview_id,
+        Interview.owner_id == owner_id,
+    )
+
     return db.execute(stmt).scalar_one_or_none()
 
 
-def get_candidate_or_none(db: Session, candidate_id: uuid.UUID, owner_id: uuid.UUID) -> Candidate | None:
+def get_candidate_or_none(
+    db: Session,
+    candidate_id: uuid.UUID,
+    owner_id: uuid.UUID,
+):
     stmt = select(Candidate).where(
-        Candidate.id == candidate_id, Candidate.owner_id == owner_id, Candidate.deleted_at.is_(None)
+        Candidate.id == candidate_id,
+        Candidate.owner_id == owner_id,
     )
+
     return db.execute(stmt).scalar_one_or_none()
 
 
 def create_interview(
-    db: Session, owner_id: uuid.UUID, candidate: Candidate, data: InterviewCreate
+    db: Session,
+    owner_id: uuid.UUID,
+    candidate: Candidate,
+    data: InterviewCreate,
 ) -> InterviewResponse:
     interview = Interview(
         owner_id=owner_id,
@@ -92,46 +138,111 @@ def create_interview(
         meeting_link=data.meeting_link,
         interviewer=data.interviewer,
     )
+
     db.add(interview)
     db.commit()
     db.refresh(interview)
 
-    reminder_service.create_reminders_for_interview(db, interview)
+    # Create HR reminders
+    reminder_service.create_reminders_for_interview(
+        db,
+        interview,
+    )
+
+    # Candidate interview email is handled by EmailJS
+    # on the frontend after the interview is successfully created.
 
     return _to_response(interview, candidate)
 
 
 def update_interview(
-    db: Session, interview_id: uuid.UUID, owner_id: uuid.UUID, data: InterviewUpdate
-) -> InterviewResponse | None:
-    stmt = select(Interview).where(Interview.id == interview_id, Interview.owner_id == owner_id)
+    db: Session,
+    interview_id: uuid.UUID,
+    owner_id: uuid.UUID,
+    data: InterviewUpdate,
+):
+    stmt = select(Interview).where(
+        Interview.id == interview_id,
+        Interview.owner_id == owner_id,
+    )
+
     interview = db.execute(stmt).scalar_one_or_none()
+
     if interview is None:
         return None
 
-    updates = data.model_dump(exclude_unset=True)
-    time_changed = "scheduled_at" in updates and updates["scheduled_at"] != interview.scheduled_at
-    status_changed_to_inactive = updates.get("status") in {"cancelled", "completed", "no_show"}
+    candidate = db.get(
+        Candidate,
+        interview.candidate_id,
+    )
 
+    if candidate is None:
+        return None
+
+    updates = data.model_dump(
+        exclude_unset=True
+    )
+
+    time_changed = (
+        "scheduled_at" in updates
+        and updates["scheduled_at"] != interview.scheduled_at
+    )
+
+    status_changed_to_inactive = (
+        updates.get("status")
+        in {"cancelled", "completed", "no_show"}
+    )
+
+    # Apply updates
     for field, value in updates.items():
         setattr(interview, field, value)
+
     db.commit()
     db.refresh(interview)
 
+    # ---------------------------------------------------------
+    # CANCEL / COMPLETE / NO-SHOW
+    # ---------------------------------------------------------
     if status_changed_to_inactive:
-        reminder_service.cancel_pending_reminders(db, interview.id)
+
+        # Cancel pending reminders
+        reminder_service.cancel_pending_reminders(
+            db,
+            interview.id,
+        )
+
+    # ---------------------------------------------------------
+    # RESCHEDULE
+    # ---------------------------------------------------------
     elif time_changed:
-        reminder_service.replace_reminders_for_reschedule(db, interview)
 
-    candidate = db.get(Candidate, interview.candidate_id)
-    return _to_response(interview, candidate)
+        # Replace old reminders with new reminders
+        reminder_service.replace_reminders_for_reschedule(
+            db,
+            interview,
+        )
+
+    return _to_response(
+        interview,
+        candidate,
+    )
 
 
-def delete_interview(db: Session, interview_id: uuid.UUID, owner_id: uuid.UUID) -> bool:
-    stmt = select(Interview).where(Interview.id == interview_id, Interview.owner_id == owner_id)
-    interview = db.execute(stmt).scalar_one_or_none()
+def delete_interview(
+    db: Session,
+    interview_id: uuid.UUID,
+    owner_id: uuid.UUID,
+) -> bool:
+    interview = get_interview_or_none(
+        db,
+        interview_id,
+        owner_id,
+    )
+
     if interview is None:
         return False
+
     db.delete(interview)
     db.commit()
+
     return True

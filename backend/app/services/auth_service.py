@@ -57,7 +57,7 @@ def register_user(db: Session, data: UserRegister) -> User:
         email=data.email,
         full_name=data.full_name,
         hashed_password=hash_password(data.password),
-        email_verified=False,
+        email_verified=True,
         otp_resend_count=0,
     )
 
@@ -65,7 +65,6 @@ def register_user(db: Session, data: UserRegister) -> User:
     db.commit()
     db.refresh(user)
 
-    send_verification_otp(db, user)
 
     return user
 
