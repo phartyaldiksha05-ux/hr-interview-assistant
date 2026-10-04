@@ -31,10 +31,14 @@ function ProtectedShell() {
   return (
     <div className="hr-shell" style={styles.shell}>
       <aside className="hr-sidebar" style={styles.sidebar}>
-        <div style={styles.logo}>
-          <span className="hr-brand-symbol" style={styles.logoMark}><i /><i /><i /></span>
-          <span>meetwise</span>
-        </div>
+        <div className="workspace-brand">
+  <span className="workspace-brand-mark">M</span>
+
+  <span className="workspace-brand-text">
+    <strong>Meetwise</strong>
+    <small>AI HR Interview Assistant</small>
+  </span>
+</div>
         <nav aria-label="Workspace navigation">
           {NAV_ITEMS.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end}>

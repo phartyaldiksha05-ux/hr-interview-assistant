@@ -1,44 +1,23 @@
 :root {
-  /* Meetwise / Landing Page Theme */
-  --auth-bg: #f5f7f6;
-  --auth-bg-soft: #eef4f1;
+  /* Meetwise / Dark AI Theme */
+  --auth-bg: #050914;
+  --auth-bg-soft: #0b1322;
 
-  --auth-panel: #ffffff;
-  --auth-panel-text: #14231f;
+  --auth-panel: rgba(10, 18, 32, 0.78);
+  --auth-panel-text: #f4f8ff;
 
-  --auth-muted: #667770;
+  --auth-muted: #9aa9bd;
 
-  --auth-border: #dfe8e3;
+  --auth-border: rgba(126, 161, 201, 0.16);
 
-  --auth-accent: #55d6a1;
-  --auth-accent-strong: #188d63;
-  --auth-accent-text: #12362a;
+  --auth-accent: #35c7ff;
+  --auth-accent-strong: #69d6ff;
+  --auth-accent-text: #03101c;
 
-  --auth-field: #f8faf9;
+  --auth-field: rgba(7, 14, 26, 0.72);
 
-  --auth-danger: #c75a55;
+  --auth-danger: #ff6b7a;
 }
-
-/*
-  Dark theme is kept only because the original Login page
-  already supports ThemeToggle.
-*/
-[data-theme="dark"] {
-  --auth-bg: #101815;
-  --auth-bg-soft: #17221e;
-
-  --auth-panel: #19231f;
-  --auth-panel-text: #eef7f2;
-
-  --auth-muted: #9aa9a3;
-
-  --auth-border: #2d3b35;
-
-  --auth-field: #141d19;
-
-  --auth-danger: #ff8b84;
-}
-
 
 /* =========================================================
    PAGE
@@ -51,14 +30,14 @@
 
   background:
     radial-gradient(
-      circle at 15% 15%,
-      rgba(85, 214, 161, 0.12),
-      transparent 30%
+      circle at 18% 18%,
+      rgba(53, 199, 255, 0.10),
+      transparent 32%
     ),
     radial-gradient(
-      circle at 82% 80%,
-      rgba(85, 214, 161, 0.06),
-      transparent 28%
+      circle at 82% 78%,
+      rgba(0, 100, 255, 0.08),
+      transparent 30%
     ),
     var(--auth-bg);
 
@@ -82,12 +61,12 @@
 
   background-image:
     linear-gradient(
-      rgba(25, 53, 43, 0.035) 1px,
+      rgba(126, 161, 201, 0.035) 1px,
       transparent 1px
     ),
     linear-gradient(
       90deg,
-      rgba(25, 53, 43, 0.035) 1px,
+      rgba(126, 161, 201, 0.035) 1px,
       transparent 1px
     );
 
@@ -122,14 +101,14 @@
 }
 
 .auth-glow-one {
-  background: #55d6a1;
+  background: #35c7ff;
 
   left: -260px;
   top: 35%;
 }
 
 .auth-glow-two {
-  background: #55d6a1;
+  background: #35c7ff;
 
   right: -260px;
   bottom: -150px;
@@ -191,7 +170,15 @@
 
   color: var(--auth-accent-text);
 
-  background: var(--auth-accent);
+  background:
+    linear-gradient(
+      135deg,
+      #35c7ff,
+      #1687ff
+    );
+
+  box-shadow:
+    0 0 24px rgba(53, 199, 255, 0.22);
 
   font-size: 14px;
 
@@ -340,7 +327,7 @@
 
   border:
     1px solid
-    rgba(24, 141, 99, 0.28);
+    rgba(53, 199, 255, 0.18);
 
   border-radius: 50%;
 
@@ -379,8 +366,11 @@
     clamp(26px, 3.2vw, 38px);
 
   box-shadow:
-    0 18px 50px
-    rgba(25, 53, 43, 0.08);
+    0 24px 70px rgba(0, 0, 0, 0.28),
+    0 0 45px rgba(53, 199, 255, 0.05);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .auth-panel-head h2 {
@@ -465,16 +455,16 @@
 }
 
 .auth-form-v2 input::placeholder {
-  color: #9aabb4;
+  color: #68788e;
 }
 
 .auth-form-v2 input:focus {
   border-color:
-    rgba(24, 141, 99, 0.65);
+    rgba(53, 199, 255, 0.55);
 
   box-shadow:
     0 0 0 4px
-    rgba(85, 214, 161, 0.14);
+    rgba(53, 199, 255, 0.14);
 }
 
 
@@ -501,9 +491,16 @@
 
   padding: 0 17px;
 
-  background: var(--auth-accent);
+  background:
+    linear-gradient(
+      135deg,
+      #35c7ff,
+      #1687ff
+    );
 
-  color: var(--auth-accent-text);
+  border: 1px solid rgba(108, 218, 255, 0.55);
+
+  color: #03101c;
 
   font: inherit;
 
@@ -522,11 +519,16 @@
 .auth-submit:hover:not(:disabled) {
   transform: translateY(-1px);
 
-  background: #68dcae;
+  background:
+    linear-gradient(
+      135deg,
+      #69d6ff,
+      #2798ff
+    );
 
   box-shadow:
     0 10px 24px
-    rgba(25, 53, 43, 0.10);
+    rgba(0, 130, 255, 0.16);
 }
 
 .auth-submit:disabled {
@@ -683,5 +685,57 @@
 
   .auth-panel-head h2 {
     font-size: 27px;
+  }
+}
+
+/* =========================================================
+   DARK AI MOBILE POLISH
+   ========================================================= */
+
+.auth-page-v2::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 680px;
+  height: 420px;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    circle,
+    rgba(53, 199, 255, 0.07),
+    transparent 68%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-topbar,
+.auth-layout-v2 {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 560px) {
+  .auth-page-v2 {
+    background:
+      radial-gradient(
+        circle at 50% 5%,
+        rgba(0, 174, 255, 0.08),
+        transparent 42%
+      ),
+      var(--auth-bg);
+  }
+
+  .auth-panel {
+    background: rgba(10, 18, 32, 0.86);
+    border-color: rgba(80, 190, 255, 0.22);
+  }
+
+  .auth-form-v2 input {
+    min-height: 48px;
+  }
+
+  .auth-submit {
+    min-height: 50px;
   }
 }

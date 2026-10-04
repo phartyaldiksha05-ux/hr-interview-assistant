@@ -8,36 +8,38 @@
    ========================================================= */
 
 :root {
-  --mw-bg: #f5f7f6;
-  --mw-surface: #ffffff;
-  --mw-surface-2: #f8faf9;
+  --mw-bg: #050914;
+  --mw-surface: rgba(10, 18, 32, 0.82);
+  --mw-surface-2: rgba(15, 27, 46, 0.92);
 
-  --mw-ink: #14231f;
-  --mw-text-on-ink: #ffffff;
-  --mw-muted: #667770;
-  --mw-faint: #8d9b96;
+  --mw-ink: #f4f8ff;
+  --mw-text-on-ink: #03101c;
+  --mw-muted: #9aa9bd;
+  --mw-faint: #68788e;
+  --mw-text-mid: #9aa9bd;
+  --mw-text-low: #8192a9;
 
-  --mw-border: #dfe7e3;
-  --mw-border-strong: #c7d3ce;
+  --mw-border: rgba(126, 161, 201, 0.16);
+  --mw-border-strong: rgba(80, 190, 255, 0.32);
 
-  --mw-accent: #55d6a1;
-  --mw-accent-strong: #188d63;
-  --mw-accent-soft: #e7f8f0;
+  --mw-accent: #35c7ff;
+  --mw-accent-strong: #69d6ff;
+  --mw-accent-soft: rgba(53, 199, 255, 0.12);
 
-  --mw-purple: #6d5ce7;
-  --mw-purple-soft: #efedff;
+  --mw-purple: #9b8cff;
+  --mw-purple-soft: rgba(109, 92, 231, 0.16);
 
-  --mw-warning: #c87b20;
-  --mw-warning-soft: #fff5e5;
+  --mw-warning: #f0ae5c;
+  --mw-warning-soft: rgba(240, 174, 92, 0.12);
 
-  --mw-danger: #d95656;
-  --mw-danger-soft: #fff0f0;
+  --mw-danger: #ff6b7a;
+  --mw-danger-soft: rgba(255, 107, 122, 0.12);
 
   --mw-shadow:
-    0 18px 45px rgba(24, 45, 38, 0.07);
+    0 20px 60px rgba(0, 0, 0, 0.28);
 
   --mw-shadow-sm:
-    0 7px 22px rgba(24, 45, 38, 0.055);
+    0 12px 34px rgba(0, 0, 0, 0.20);
 
   --mw-radius: 16px;
   --mw-radius-sm: 12px;
@@ -48,36 +50,35 @@
    ========================================================= */
 
 [data-theme="dark"] {
-  --mw-bg: #0c1514;
-  --mw-surface: #13211f;
-  --mw-surface-2: #172724;
+  --mw-bg: #050914;
+  --mw-surface: rgba(10, 18, 32, 0.82);
+  --mw-surface-2: rgba(15, 27, 46, 0.92);
 
-  --mw-ink: #eef8f4;
-  --mw-text-on-ink: #14231f;
-  --mw-muted: #a8b9b2;
-  --mw-faint: #80928b;
+  --mw-ink: #f4f8ff;
+  --mw-text-on-ink: #03101c;
+  --mw-muted: #9aa9bd;
+  --mw-faint: #68788e;
+  --mw-text-mid: #9aa9bd;
+  --mw-text-low: #8192a9;
 
-  --mw-border: #263a35;
-  --mw-border-strong: #38514a;
+  --mw-border: rgba(126, 161, 201, 0.16);
+  --mw-border-strong: rgba(80, 190, 255, 0.32);
 
-  --mw-accent: #72e1b5;
-  --mw-accent-strong: #8ce8c2;
-  --mw-accent-soft: #15372c;
+  --mw-accent: #35c7ff;
+  --mw-accent-strong: #69d6ff;
+  --mw-accent-soft: rgba(53, 199, 255, 0.12);
 
-  --mw-purple: #a49aff;
-  --mw-purple-soft: #282342;
+  --mw-purple: #9b8cff;
+  --mw-purple-soft: rgba(109, 92, 231, 0.16);
 
   --mw-warning: #f0ae5c;
-  --mw-warning-soft: #3a2a17;
+  --mw-warning-soft: rgba(240, 174, 92, 0.12);
 
-  --mw-danger: #ff8585;
-  --mw-danger-soft: #3a2020;
+  --mw-danger: #ff6b7a;
+  --mw-danger-soft: rgba(255, 107, 122, 0.12);
 
-  --mw-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.28);
-
-  --mw-shadow-sm:
-    0 8px 24px rgba(0, 0, 0, 0.22);
+  --mw-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  --mw-shadow-sm: 0 12px 34px rgba(0, 0, 0, 0.20);
 }
 
 /* =========================================================
@@ -86,7 +87,10 @@
 
 .hr-shell {
   min-height: 100vh !important;
-  background: var(--mw-bg) !important;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(53, 199, 255, 0.09), transparent 28%),
+    radial-gradient(circle at 85% 20%, rgba(35, 139, 255, 0.08), transparent 30%),
+    var(--mw-bg) !important;
   color: var(--mw-ink) !important;
   font-family: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
@@ -126,7 +130,7 @@
   border-right: 1px solid var(--mw-border);
 
   box-shadow:
-    4px 0 24px rgba(20, 35, 31, 0.025);
+    4px 0 24px rgba(0, 0, 0, 0.18);
 }
 
 /* Brand */
@@ -148,14 +152,21 @@
 .hr-brand-symbol {
   width: 34px !important;
   height: 34px !important;
-
   border-radius: 11px !important;
 
-  background: var(--mw-accent) !important;
-  color: #12342a !important;
+  background: linear-gradient(
+    135deg,
+    #35c7ff,
+    #238bff
+  ) !important;
+
+  color: #03101c !important;
 
   box-shadow:
-    0 8px 18px rgba(85, 214, 161, 0.18);
+    0 8px 22px rgba(35, 139, 255, 0.22),
+    0 0 18px rgba(53, 199, 255, 0.12);
+
+  border: 1px solid rgba(105, 214, 255, 0.35);
 }
 
 .hr-brand-symbol i {
@@ -223,7 +234,7 @@
 
   background: var(--mw-accent-soft) !important;
 
-  border-color: rgba(85, 214, 161, 0.28) !important;
+  border-color: rgba(53, 199, 255, 0.28) !important;
 }
 
 .hr-sidebar nav a.active::before,
@@ -233,7 +244,7 @@
   opacity: 1;
 
   box-shadow:
-    0 0 0 4px rgba(85, 214, 161, 0.12);
+    0 0 0 4px rgba(53, 199, 255, 0.12);
 }
 
 /* Sidebar bottom */
@@ -287,7 +298,10 @@
 
   flex: 1;
 
-  background: var(--mw-bg) !important;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(53, 199, 255, 0.09), transparent 28%),
+    radial-gradient(circle at 85% 20%, rgba(35, 139, 255, 0.08), transparent 30%),
+    var(--mw-bg) !important;
 }
 
 /* Top header */
@@ -513,26 +527,16 @@
 /* Primary */
 
 .workspace-primary-action {
-  background: var(--mw-ink) !important;
-
-  /*
-    Important:
-    Use surface as text instead of mw-bg.
-    This keeps the button readable in both themes.
-  */
-  color: var(--mw-surface) !important;
-
-  border: 1px solid var(--mw-ink) !important;
-
-  box-shadow:
-    0 8px 18px rgba(20, 35, 31, 0.12);
+  background: linear-gradient(135deg, #35c7ff, #238bff) !important;
+  color: #03101c !important;
+  border: 1px solid rgba(80, 190, 255, 0.45) !important;
+  box-shadow: 0 10px 24px rgba(35, 139, 255, 0.18);
 }
 
 .workspace-primary-action:hover {
   transform: translateY(-1px);
 
-  box-shadow:
-    0 11px 24px rgba(20, 35, 31, 0.16);
+  box-shadow: 0 12px 28px rgba(35, 139, 255, 0.26);
 }
 
 /* Secondary */
@@ -1659,7 +1663,7 @@
     border-bottom: 1px solid var(--mw-border);
 
     box-shadow:
-      0 8px 22px rgba(20, 35, 31, 0.06);
+      0 8px 22px rgba(0, 0, 0, 0.24);
   }
 
   .hr-sidebar > div:first-child {
@@ -2032,15 +2036,15 @@
    ========================================================= */
 
 .hr-content .reminder-actions button {
-  color: #14231f !important;
+  color: #03101c !important;
   font-weight: 650 !important;
 }
 
 .hr-content .reminder-actions button:hover {
-  color: #14231f !important;
+  color: #03101c !important;
   box-shadow:
-    0 0 0 3px rgba(114, 225, 181, 0.08),
-    0 0 18px rgba(114, 225, 181, 0.14) !important;
+    0 0 0 3px rgba(53, 199, 255, 0.08),
+    0 0 18px rgba(53, 199, 255, 0.14) !important;
 }
 /* =========================================================
    CANDIDATES DIRECTORY
@@ -2715,13 +2719,61 @@
 }
 /* Candidate Detail - Schedule button */
 .candidate-profile-actions .workspace-primary-action {
-  background: #14231f !important;
-  color: #ffffff !important;
-  border: 1px solid #14231f !important;
+  background: linear-gradient(135deg, #35c7ff, #238bff) !important;
+  color: #03101c !important;
+  border: 1px solid rgba(80, 190, 255, 0.45) !important;
+  box-shadow: 0 10px 24px rgba(35, 139, 255, 0.18);
 }
 
 .candidate-profile-actions .workspace-primary-action:hover {
-  background: #304139 !important;
-  color: #ffffff !important;
-  border-color: #304139 !important;
+  background: linear-gradient(135deg, #69d6ff, #35a4ff) !important;
+  color: #03101c !important;
+  border-color: rgba(80, 190, 255, 0.6) !important;
+}
+.workspace-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workspace-brand-mark {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  border-radius: 11px;
+  background: linear-gradient(135deg, #35c7ff, #238bff);
+  color: #03101c;
+
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+
+  border: 1px solid rgba(105, 214, 255, 0.35);
+  box-shadow:
+    0 8px 22px rgba(35, 139, 255, 0.22),
+    0 0 18px rgba(53, 199, 255, 0.12);
+}
+
+.workspace-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workspace-brand-text strong {
+  color: #f4f8ff;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.workspace-brand-text small {
+  color: #68788e;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
