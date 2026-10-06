@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { s } from "../styles/theme";
 
 export default function InterviewForm({ candidates, preselectedCandidateId, onSubmit, onCancel, submitting }) {
+  const dateTimeInputRef = useRef(null);
   const [values, setValues] = useState({
     candidate_id: preselectedCandidateId ?? candidates[0]?.id ?? "",
     scheduled_at: "",
@@ -64,7 +65,21 @@ export default function InterviewForm({ candidates, preselectedCandidateId, onSu
       <div style={styles.row}>
         <label style={{ ...s.label, flex: 1 }}>
           Date and time (your local timezone)
-          <input name="scheduled_at" type="datetime-local" min={minimumLocalDateTime()} value={values.scheduled_at} onChange={handleChange} style={s.input} required />
+          <input
+  ref={dateTimeInputRef}
+  name="scheduled_at"
+  type="datetime-local"
+  min={minimumLocalDateTime()}
+  value={values.scheduled_at}
+  onChange={handleChange}
+  onClick={(event) => {
+    if (event.currentTarget.showPicker) {
+      event.currentTarget.showPicker();
+    }
+  }}
+  style={s.input}
+  required
+/>
         </label>
       </div>
 

@@ -475,7 +475,7 @@
 
 .workspace-welcome {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
@@ -508,9 +508,15 @@
 
 .workspace-primary-action,
 .workspace-secondary-action {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   min-height: 42px !important;
 
   padding: 0 15px !important;
+  box-sizing: border-box;
+  line-height: 1;
 
   border-radius: 11px !important;
 
@@ -562,8 +568,7 @@
 .workspace-stats {
   display: grid !important;
 
-  grid-template-columns:
-    repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   margin-bottom: 24px !important;
 
@@ -733,13 +738,9 @@
 
   display: grid;
 
-  grid-template-columns:
-    78px
-    4px
-    minmax(0, 1fr)
-    auto !important;
+  grid-template-columns: 88px 4px minmax(0, 1fr) minmax(120px, auto) !important;
 
-  gap: 15px !important;
+  gap: 16px !important;
 
   padding: 12px 4px !important;
 
@@ -759,16 +760,26 @@
     ) !important;
 }
 
+.workspace-interview-time {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .workspace-interview-time span {
   color: var(--mw-ink) !important;
-
   font-size: 12px !important;
+  line-height: 1.2;
+  white-space: nowrap;
 }
+
 
 .workspace-interview-time small {
   color: var(--mw-muted) !important;
-
   font-size: 10px !important;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .workspace-interview-rule {
@@ -781,27 +792,51 @@
 }
 
 .workspace-interview-name {
+  display: block;
+  min-width: 0;
   color: var(--mw-ink) !important;
-
   font-size: 13px !important;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.workspace-interview-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-self: center;
 }
 
 .workspace-interview-main > span {
   color: var(--mw-muted) !important;
-
   font-size: 10px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.workspace-interview-end {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .workspace-countdown {
   color: var(--mw-purple) !important;
-
   font-size: 10px !important;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .workspace-interview-end a {
   color: var(--mw-accent-strong) !important;
-
   font-size: 10px !important;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 /* =========================================================
@@ -876,17 +911,35 @@
    ========================================================= */
 
 .workspace-empty-panel {
-  min-height: 72px;
+  width: 100%;
+  box-sizing: border-box;
 
-  padding: 15px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
 
-  border:
-    1px dashed var(--mw-border-strong) !important;
+  gap: 12px;
 
-  border-radius: 12px !important;
+  min-height: 220px;
+  padding: 32px 24px;
 
-  background: var(--mw-surface-2) !important;
+  border-radius: 10px !important;
+  color: var(--mw-purple) !important;
+  background: var(--mw-purple-soft) !important;
+
+  font-size: 10px !important;
+  text-align: center !important;
 }
+
+.workspace-empty-panel > div {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 
 .workspace-empty-icon {
   width: 36px !important;
@@ -904,19 +957,11 @@
 
 .workspace-empty-panel strong {
   color: var(--mw-ink) !important;
-
   font-size: 12px !important;
 }
 
 .workspace-empty-panel p {
   color: var(--mw-muted) !important;
-
-  font-size: 10px !important;
-}
-
-.workspace-empty-panel > a {
-  color: var(--mw-accent-strong) !important;
-
   font-size: 10px !important;
 }
 
@@ -996,39 +1041,7 @@
    ========================================================= */
 
 .workspace-feedback-section {
-  border-left: 0 !important;
-}
-
-.workspace-feedback-row {
-  min-height: 62px !important;
-
-  border-top: 1px solid var(--mw-border) !important;
-}
-
-.workspace-feedback-row a {
-  color: var(--mw-ink) !important;
-
-  font-size: 11px !important;
-}
-
-.workspace-feedback-row small {
-  color: var(--mw-muted) !important;
-
-  font-size: 9px !important;
-}
-
-.workspace-feedback-row > a:last-child {
-  color: var(--mw-accent-strong) !important;
-}
-
-.workspace-feedback-empty {
-  color: var(--mw-muted) !important;
-}
-
-.workspace-summary-foot {
-  color: var(--mw-faint) !important;
-
-  font-size: 10px !important;
+  display: none !important;
 }
 
 /* =========================================================
@@ -1090,6 +1103,9 @@
 .workspace-form input,
 .workspace-form select,
 .workspace-form textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 40px;
 
   box-sizing: border-box;
@@ -1590,16 +1606,14 @@
   }
 
   .workspace-stats {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .workspace-stat:nth-child(3) {
+  .workspace-stat:nth-child(even) {
     border-right: 0 !important;
   }
 
-  .workspace-stat:nth-child(4),
-  .workspace-stat:nth-child(5) {
+  .workspace-stat:nth-child(n + 3) {
     border-top: 1px solid var(--mw-border);
   }
 
@@ -1639,6 +1653,16 @@
    ========================================================= */
 
 @media (max-width: 760px) {
+    /* Candidate preparation */
+
+  .interview-candidate-context {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .interview-candidate-context > div {
+    padding: 13px 14px;
+  }
   .hr-shell {
     display: block !important;
   }
@@ -1781,9 +1805,7 @@
   /* Stats */
 
   .workspace-stats {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
+    grid-template-columns: 1fr;
     border-radius: 13px;
   }
 
@@ -1797,11 +1819,11 @@
     font-size: 24px !important;
   }
 
-  .workspace-stat:nth-child(even) {
+  .workspace-stat {
     border-right: 0 !important;
   }
 
-  .workspace-stat:nth-child(n + 3) {
+  .workspace-stat + .workspace-stat {
     border-top: 1px solid var(--mw-border);
   }
 
@@ -1837,10 +1859,10 @@
 
   .workspace-interview-end {
     grid-column: 3;
-
-    align-items: flex-start;
-
-    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
   }
 
   .workspace-candidate-status {
@@ -1875,7 +1897,10 @@
 
   .workspace-header-actions {
     width: 100%;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    justify-content: stretch;
   }
 
   /* Page headers */
@@ -1949,6 +1974,10 @@
    ========================================================= */
 
 @media (max-width: 430px) {
+  .workspace-header-actions {
+    grid-template-columns: 1fr;
+  }
+
   .hr-content {
     padding-right: 11px !important;
 
@@ -2135,6 +2164,7 @@
 
 .candidate-table-scroll {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   border: 1px solid var(--mw-border);
   border-radius: 14px;
@@ -2289,6 +2319,10 @@
 .candidate-directory-loading,
 .candidate-directory-empty,
 .candidate-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 32px 20px;
   text-align: center;
   border: 1px solid var(--mw-border);
@@ -2776,4 +2810,117 @@
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+/* =========================================================
+   EMPTY PANEL ACTION
+   ========================================================= */
+
+.workspace-empty-panel > a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  width: fit-content !important;
+  max-width: 100%;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+input[type="datetime-local"] {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 1 !important;
+  cursor: pointer !important;
+  filter: invert(1) brightness(1.4) !important;
+  width: 18px;
+  height: 18px;
+  padding: 2px;
+}
+/* =========================================================
+   INTERVIEW DETAIL — CANDIDATE PREPARATION
+   ========================================================= */
+
+.interview-candidate-context {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.interview-candidate-context > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--mw-border);
+  border-radius: 12px;
+  background: var(--mw-surface-2);
+}
+
+.interview-candidate-context > div > span:first-child {
+  display: block;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.interview-candidate-context > div > strong {
+  display: block;
+  max-width: 100%;
+  color: var(--mw-ink) !important;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.interview-candidate-context > div > span:not(:first-child) {
+  display: block;
+  max-width: 100%;
+  color: var(--mw-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.interview-candidate-context > div > button,
+.interview-candidate-context > div > a {
+  flex: 0 0 auto;
+  max-width: 100%;
+  margin-top: 4px;
+}
+
+.interview-candidate-context > div > button {
+  white-space: normal;
+  text-align: center;
+}
+
+.interview-candidate-context > div:last-child > span:not(:first-child) {
+  width: 100%;
+  color: var(--mw-text-mid);
+  line-height: 1.65;
+}
+/* Candidate Detail header contact details */
+.candidate-contact-details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+
+.candidate-contact-details span {
+  overflow-wrap: anywhere;
+}
+.resume-profile-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }

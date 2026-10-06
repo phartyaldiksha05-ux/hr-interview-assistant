@@ -13,3 +13,5 @@ backend/uploads/*
 .vscode/
 .idea/
 .DS_Store
+private_key.pem
+public_key.pem

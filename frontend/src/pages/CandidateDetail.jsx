@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { candidatesApi } from "../api/candidates";
 import { interviewsApi } from "../api/interviews";
 import { aiApi } from "../api/ai";
-import { notesApi } from "../api/notes";
 import ResumeUploadForm from "../components/ResumeUploadForm";
 import { useApi } from "../hooks/useApi";
 import { formatLocalDateTime } from "../hooks/useCountdown";
@@ -559,9 +558,6 @@ export default function CandidateDetail() {
 
   const [showResumeUpload, setShowResumeUpload] = useState(false);
   const [resumeActionError, setResumeActionError] = useState(null);
-  const [hrNotes, setHrNotes] = useState([]);
-  const [notesLoading, setNotesLoading] = useState(true);
-  const [notesError, setNotesError] = useState(null);
   const resumePickerOpened = useRef(false);
 
   useEffect(() => {
@@ -588,59 +584,6 @@ export default function CandidateDetail() {
     location.state,
     navigate,
   ]);
-
-  useEffect(() => {
-    if (!interviews) return;
-
-    let cancelled = false;
-
-    const relevantInterviews = interviews.filter(
-      (interview) => interview.candidate_id === id
-    );
-
-    setNotesLoading(true);
-    setNotesError(null);
-
-    Promise.all(
-      relevantInterviews.map(async (interview) => {
-        const notes = await notesApi.list(interview.id);
-
-        return notes.map((note) => ({
-          ...note,
-          interview,
-        }));
-      })
-    )
-      .then((results) => {
-        if (!cancelled) {
-          setHrNotes(
-            results
-              .flat()
-              .sort(
-                (a, b) =>
-                  new Date(b.created_at) -
-                  new Date(a.created_at)
-              )
-          );
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setNotesError(
-            err.message ?? "Could not load HR notes."
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setNotesLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id, interviews]);
 
   async function handleResumeComplete(candidateId) {
     setShowResumeUpload(false);
@@ -758,17 +701,19 @@ export default function CandidateDetail() {
           </span>
 
           <button
-  type="button"
-  onClick={() => navigate(`/interviews?candidate=${id}`)}
-  style={{
-    ...s.buttonPrimary,
-    background: "#14231f",
-    color: "#ffffff",
-    border: "1px solid #14231f",
-  }}
->
-  Schedule interview
-</button>
+            type="button"
+            onClick={() =>
+              navigate(`/interviews?candidate=${id}`)
+            }
+            style={{
+              ...s.buttonPrimary,
+              background: "#14231f",
+              color: "#ffffff",
+              border: "1px solid #14231f",
+            }}
+          >
+            Schedule interview
+          </button>
         </div>
       </div>
 
@@ -982,94 +927,6 @@ export default function CandidateDetail() {
           })}
         </div>
 
-        <div style={s.card}>
-          <div style={styles.panelHeader}>
-            <h3 style={s.sectionTitle}>
-              HR feedback & notes
-            </h3>
-
-            <span
-              style={{
-                color: color.textLow,
-                fontSize: 12,
-              }}
-            >
-              {hrNotes.length}{" "}
-              {hrNotes.length === 1 ? "note" : "notes"}
-            </span>
-          </div>
-
-          {notesLoading && (
-            <p style={s.emptyState}>
-              Loading interview notes…
-            </p>
-          )}
-
-          {interviewsError && (
-            <p style={s.errorText}>{interviewsError}</p>
-          )}
-
-          {notesError && (
-            <p style={s.errorText}>{notesError}</p>
-          )}
-
-          {!notesLoading &&
-            !notesError &&
-            hrNotes.length === 0 && (
-              <p style={s.emptyState}>
-                Feedback added to interviews will appear here.
-              </p>
-            )}
-
-          {!notesLoading &&
-            hrNotes.map((note) => (
-              <article
-                key={note.id}
-                style={styles.noteItem}
-              >
-                <div style={styles.noteMeta}>
-                  <Link
-                    to={`/interviews/${note.interview.id}`}
-                    style={styles.noteInterview}
-                  >
-                    {
-                      formatLocalDateTime(
-                        note.interview.scheduled_at
-                      ).date
-                    }{" "}
-                    interview
-                  </Link>
-
-                  <time>
-                    {new Date(
-                      note.created_at
-                    ).toLocaleDateString()}
-                  </time>
-                </div>
-
-                <p style={styles.noteContent}>
-                  {note.content}
-                </p>
-
-                <div style={styles.noteTags}>
-                  {note.rating != null && (
-                    <span>
-                      {note.rating}/5 rating
-                    </span>
-                  )}
-
-                  {note.recommendation && (
-                    <span
-                      style={badge(note.recommendation)}
-                    >
-                      {note.recommendation}
-                    </span>
-                  )}
-                </div>
-              </article>
-            ))}
-        </div>
-
         <div
           id="briefing"
           style={{ gridColumn: "1 / -1" }}
@@ -1171,42 +1028,6 @@ const styles = {
     borderBottom: `1px solid ${color.border}`,
     textDecoration: "none",
     color: color.textHigh,
-  },
-
-  noteItem: {
-    padding: "12px 0",
-    borderBottom: `1px solid ${color.border}`,
-  },
-
-  noteMeta: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: 12,
-    flexWrap: "wrap",
-    fontSize: 12,
-    color: color.textLow,
-  },
-
-  noteInterview: {
-    color: color.ink,
-    textDecoration: "none",
-    fontWeight: 600,
-  },
-
-  noteContent: {
-    margin: "8px 0",
-    fontSize: 13,
-    lineHeight: 1.6,
-    whiteSpace: "pre-wrap",
-    overflowWrap: "anywhere",
-  },
-
-  noteTags: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 10,
-    fontSize: 12,
-    color: color.textMid,
   },
 
   questionsList: {
