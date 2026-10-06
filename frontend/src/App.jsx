@@ -10,6 +10,8 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { color, s } from "./styles/theme";
+import { enablePushNotifications, getLocalPushSubscription } from "./services/pushNotifications";
+import { useCallback, useEffect, useState } from "react";
 import "./styles/workspace.css";
 
 const NAV_ITEMS = [
@@ -21,7 +23,40 @@ const NAV_ITEMS = [
 function ProtectedShell() {
   const { user, loading, logout } = useAuth();
   const location = useLocation();
-  const { reminders, permission, requestPermission, acknowledge, soundEnabled, toggleSound } = useReminderPolling();
+  const { reminders, permission, acknowledge, soundEnabled, toggleSound } = useReminderPolling();
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  const [pushError, setPushError] = useState("");
+
+  useEffect(() => {
+    if (loading || !user) return undefined;
+
+    let cancelled = false;
+    getLocalPushSubscription()
+      .then((subscription) => {
+        if (!cancelled) setPushEnabled(Boolean(subscription));
+      })
+      .catch(() => {
+        // Existing workspace behavior remains available if the browser does not expose push state.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, user?.id]);
+
+  const handleEnableNotifications = useCallback(async () => {
+    setPushBusy(true);
+    setPushError("");
+    try {
+      const result = await enablePushNotifications();
+      setPushEnabled(Boolean(result?.status?.enabled));
+    } catch (error) {
+      setPushError(error?.message || "Could not enable Meetwise notifications.");
+    } finally {
+      setPushBusy(false);
+    }
+  }, []);
 
   if (loading) return <div style={styles.loadingScreen}>Loading your workspace…</div>;
   if (!user) return <Navigate to="/login" replace />;
@@ -62,13 +97,19 @@ function ProtectedShell() {
             </div>
             <div className="workspace-topbar-actions">
               {reminders.length > 0 && <span style={styles.bell}>● {reminders.length} reminder{reminders.length > 1 ? "s" : ""}</span>}
-              {permission !== "granted" && permission !== "unsupported" && (
-                <button onClick={requestPermission} style={s.buttonSecondary}>Enable notifications</button>
+              {!pushEnabled && permission !== "unsupported" && (
+                <button onClick={handleEnableNotifications} style={s.buttonSecondary} disabled={pushBusy}>
+                  {pushBusy ? "Enabling…" : "Enable notifications"}
+                </button>
               )}
               <label className="reminder-sound-toggle"><input type="checkbox" checked={soundEnabled} onChange={toggleSound} disabled={permission !== "granted"} /> Sound</label>
             </div>
           </div>
         </header>
+
+        {pushError && (
+          <div role="status" style={styles.pushError}>{pushError}</div>
+        )}
 
         <div className="hr-content" style={styles.content}>
           <Routes>
@@ -118,4 +159,5 @@ const styles = {
   topbar: { display: "flex", alignItems: "center" },
   content: { flex: 1 },
   bell: { padding: "7px 10px", borderRadius: 999, background: "var(--mw-accent-soft)", color: "var(--mw-accent-strong)", fontSize: 11, fontWeight: 800 },
+  pushError: { margin: "10px 18px 0", padding: "9px 12px", borderRadius: 10, background: "#fff4f4", color: "#a33a3a", fontSize: 12, fontWeight: 600 },
 };

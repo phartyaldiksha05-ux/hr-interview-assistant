@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "uploads"
     REMINDER_POLL_SECONDS: int = 60
 
+    # Web Push / VAPID
+    # Keep the private key backend-only; the public key is safe to expose to the frontend.
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_CLAIMS_EMAIL: str = ""
+
     SECRET_KEY: str = "change-this-in-production-to-a-random-64-char-string"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 

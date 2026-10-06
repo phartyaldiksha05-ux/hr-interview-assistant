@@ -6,3 +6,4 @@ from app.models.interview_question import InterviewQuestion  # noqa: F401
 from app.models.interview_note import InterviewNote  # noqa: F401
 from app.models.ai_generation import AIGeneration  # noqa: F401
 from app.models.user import User  # noqa: F401
+from app.models.push_subscription import PushSubscription  # noqa: F401

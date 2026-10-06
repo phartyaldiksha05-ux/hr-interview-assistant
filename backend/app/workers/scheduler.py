@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.config import settings
 from app.db.session import SessionLocal
+from app.services.push_service import send_web_push_for_reminders
 from app.services.reminder_service import claim_due_reminders
 
 logger = logging.getLogger("reminder_scheduler")
@@ -20,6 +21,7 @@ def _poll_due_reminders() -> None:
         due = claim_due_reminders(db)
         if due:
             logger.info("Delivered %d reminder(s): %s", len(due), [str(r.id) for r in due])
+            send_web_push_for_reminders(db, due)
     except Exception:
         logger.exception("Reminder poll failed")
     finally:

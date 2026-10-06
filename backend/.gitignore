@@ -4,3 +4,8 @@ __pycache__/
 venv/
 .env
 uploads/
+# VAPID keys
+private_key.pem
+public_key.pem
+backend/private_key.pem
+backend/public_key.pem
