@@ -59,7 +59,8 @@ function InterviewRow({ interview }) {
         )}
 
         {interview.meeting_link &&
-          interview.status === "scheduled" && (
+          interview.status === "scheduled" &&
+          new Date(interview.scheduled_at).getTime() > Date.now() && (
             <a
               href={interview.meeting_link}
               target="_blank"
@@ -153,13 +154,19 @@ export default function Interviews({
 
   const [submitting, setSubmitting] = useState(false);
   const [actionError, setActionError] = useState(null);
+  const [clockNow, setClockNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(Date.now()), 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const {
     upcoming,
     completed,
     previous,
   } = useMemo(() => {
-    const now = Date.now();
+    const now = clockNow;
 
     const upcomingInterviews = (
       interviews ?? []
@@ -214,7 +221,7 @@ export default function Interviews({
       completed: completedInterviews,
       previous: previousInterviews,
     };
-  }, [interviews]);
+  }, [interviews, clockNow]);
 
   useEffect(() => {
     if (preselectedCandidateId) {

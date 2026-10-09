@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { dashboardApi } from "../api/dashboard";
 import { candidatesApi } from "../api/candidates";
@@ -54,7 +55,9 @@ function InterviewItem({ interview, featured = false }) {
       <div className="workspace-interview-end">
         <span className="workspace-countdown">{countdown}</span>
 
-        {interview.meeting_link && (
+        {interview.status === "scheduled" &&
+          new Date(interview.scheduled_at).getTime() > Date.now() &&
+          interview.meeting_link && (
           <a
             href={interview.meeting_link}
             target="_blank"
@@ -104,6 +107,12 @@ export default function Dashboard({
   onAcknowledge,
 }) {
   const { user } = useAuth();
+  const [clockNow, setClockNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(Date.now()), 15_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const {
     data: stats,
@@ -129,7 +138,7 @@ export default function Dashboard({
     .filter(
       (interview) =>
         interview.status === "scheduled" &&
-        new Date(interview.scheduled_at) > new Date()
+        new Date(interview.scheduled_at).getTime() > clockNow
     )
     .sort(
       (a, b) =>
@@ -304,7 +313,7 @@ export default function Dashboard({
 
             <Stat
               label="Active reminders"
-              value={stats?.pending_reminders}
+              value={reminders?.length ?? 0}
               note="Need your attention"
             />
           </section>

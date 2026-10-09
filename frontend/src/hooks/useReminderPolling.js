@@ -114,13 +114,23 @@ export function useReminderPolling(intervalMs = 15_000) {
   const poll = useCallback(async () => {
     try {
       const due = await remindersApi.due();
-      setReminders(due);
-      for (const reminder of due) {
+      const now = Date.now();
+      const active = due.filter((reminder) => {
+        const start = new Date(reminder.interview_scheduled_at).getTime();
+        return Number.isFinite(start) && start > now;
+      });
+      setReminders(active);
+      for (const reminder of active) {
         if (await claimReminderNotification(reminder.id, seenIds)) notifyNew(reminder);
       }
     } catch {
-      // A single failed poll shouldn't crash the app or clear existing alerts;
-      // just try again on the next interval.
+      // Keep reminders available during a transient API failure, but still remove
+      // entries whose interview time has passed.
+      const now = Date.now();
+      setReminders((previous) => previous.filter((reminder) => {
+        const start = new Date(reminder.interview_scheduled_at).getTime();
+        return Number.isFinite(start) && start > now;
+      }));
     }
   }, [notifyNew]);
 

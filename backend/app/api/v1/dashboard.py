@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -8,20 +9,29 @@ from app.api.deps import get_current_user
 from app.db.session import get_db
 from app.models.candidate import Candidate
 from app.models.interview import Interview
-from app.models.reminder import Reminder
 from app.models.user import User
 from app.schemas.interview import InterviewResponse
-from app.services import interview_service
+from app.services import interview_service, reminder_service
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/stats")
-def get_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)) -> dict:
+def get_stats(
+    timezone_name: str = Query(default="UTC", alias="timezone", max_length=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
     owner_id = current_user.id
     now = datetime.now(timezone.utc)
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today_start + timedelta(days=1)
+    try:
+        user_timezone = ZoneInfo(timezone_name)
+    except (ZoneInfoNotFoundError, ValueError):
+        raise HTTPException(status_code=422, detail="Invalid timezone. Use an IANA timezone such as Asia/Kolkata.")
+
+    local_today = now.astimezone(user_timezone).date()
+    today_start = datetime.combine(local_today, time.min, tzinfo=user_timezone).astimezone(timezone.utc)
+    today_end = datetime.combine(local_today + timedelta(days=1), time.min, tzinfo=user_timezone).astimezone(timezone.utc)
 
     total_candidates = db.execute(
         select(func.count()).select_from(Candidate).where(Candidate.owner_id == owner_id, Candidate.deleted_at.is_(None))
@@ -42,11 +52,7 @@ def get_stats(db: Session = Depends(get_db), current_user: User = Depends(get_cu
         )
     ).scalar_one()
 
-    pending_reminders = db.execute(
-        select(func.count()).select_from(Reminder).join(Interview, Reminder.interview_id == Interview.id).where(
-            Interview.owner_id == owner_id, Interview.status == "scheduled", Reminder.status == "delivered"
-        )
-    ).scalar_one()
+    pending_reminders = reminder_service.count_active_reminders(db, owner_id, now=now)
     pending_feedback = len(interview_service.list_pending_feedback(db, owner_id))
 
     return {

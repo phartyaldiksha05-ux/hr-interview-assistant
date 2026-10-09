@@ -12,6 +12,11 @@ export default function ReminderAlert({ reminder, onAcknowledge }) {
   const tier = TIER_LABEL[reminder.reminder_type] ?? { icon: "🔔", text: "Interview reminder" };
   const countdown = useCountdown(reminder.interview_scheduled_at);
   const { date, time } = formatLocalDateTime(reminder.interview_scheduled_at);
+  const interviewStart = new Date(reminder.interview_scheduled_at).getTime();
+
+  // Backend filtering is authoritative; this guard also prevents a stale alert from
+  // briefly rendering if the interview time passes between polling requests.
+  if (!Number.isFinite(interviewStart) || interviewStart <= Date.now()) return null;
 
   return (
     <div style={styles.card}>

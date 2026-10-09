@@ -3,6 +3,7 @@ import tempfile
 import unittest
 import uuid
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -217,6 +218,142 @@ class ExistingWorkflowTests(unittest.TestCase):
                 db.scalars(select(Reminder).where(Reminder.interview_id == uuid.UUID(interview_id))).all()
             )
         self.assertTrue(all(reminder.status in {"cancelled", "skipped"} for reminder in reminders))
+
+
+    def test_dashboard_today_count_uses_requested_timezone(self) -> None:
+        candidate = self.create_candidate(f"today-{uuid.uuid4().hex}@example.com")
+        local_tz = ZoneInfo("Asia/Kolkata")
+        local_today = datetime.now(local_tz).date()
+        # The counter is for the local calendar date, not only future interviews.
+        scheduled_at = datetime.combine(local_today, datetime.min.time(), tzinfo=local_tz) + timedelta(hours=10)
+        created = self.client.post(
+            "/api/v1/interviews",
+            json={
+                "candidate_id": candidate["id"],
+                "scheduled_at": scheduled_at.isoformat(),
+                "duration_minutes": 45,
+                "interview_type": "video",
+                "interviewer": "Workflow Test",
+            },
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+
+        stats = self.client.get("/api/v1/dashboard/stats?timezone=Asia%2FKolkata")
+        self.assertEqual(stats.status_code, 200, stats.text)
+        self.assertEqual(stats.json()["today_interviews"], 1)
+
+    def test_active_reminders_only_show_latest_tier_for_upcoming_interview(self) -> None:
+        candidate = self.create_candidate(f"reminder-{uuid.uuid4().hex}@example.com")
+        scheduled_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+        created = self.client.post(
+            "/api/v1/interviews",
+            json={
+                "candidate_id": candidate["id"],
+                "scheduled_at": scheduled_at.isoformat(),
+                "duration_minutes": 45,
+                "interview_type": "video",
+                "meeting_link": "https://meet.google.com/test-room",
+                "interviewer": "Workflow Test",
+            },
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+        interview_id = uuid.UUID(created.json()["id"])
+        with self.TestSession() as db:
+            reminders = list(db.scalars(select(Reminder).where(Reminder.interview_id == interview_id)).all())
+            for reminder in reminders:
+                if reminder.reminder_type in {"24_hour", "1_hour"}:
+                    reminder.status = "delivered"
+                    reminder.delivered_at = datetime.now(timezone.utc)
+            db.commit()
+
+        active = self.client.get("/api/v1/reminders/due")
+        self.assertEqual(active.status_code, 200, active.text)
+        matching = [item for item in active.json() if item["interview_id"] == str(interview_id)]
+        self.assertEqual(len(matching), 1)
+        self.assertEqual(matching[0]["reminder_type"], "1_hour")
+
+        stats = self.client.get("/api/v1/dashboard/stats?timezone=Asia%2FKolkata")
+        self.assertEqual(stats.status_code, 200, stats.text)
+        self.assertEqual(stats.json()["pending_reminders"], 1)
+
+        acknowledged = self.client.patch(f"/api/v1/reminders/{matching[0]['id']}/acknowledge", json={})
+        self.assertEqual(acknowledged.status_code, 200, acknowledged.text)
+        active_after_ack = self.client.get("/api/v1/reminders/due")
+        self.assertEqual(active_after_ack.status_code, 200, active_after_ack.text)
+        self.assertFalse(any(item["interview_id"] == str(interview_id) for item in active_after_ack.json()))
+        stats_after_ack = self.client.get("/api/v1/dashboard/stats?timezone=Asia%2FKolkata")
+        self.assertEqual(stats_after_ack.status_code, 200, stats_after_ack.text)
+        self.assertEqual(stats_after_ack.json()["pending_reminders"], 0)
+
+    def test_claim_due_reminders_skips_stale_tiers_and_started_interviews(self) -> None:
+        candidate = self.create_candidate(f"scheduler-{uuid.uuid4().hex}@example.com")
+        scheduled_at = datetime.now(timezone.utc) + timedelta(hours=2)
+        created = self.client.post(
+            "/api/v1/interviews",
+            json={
+                "candidate_id": candidate["id"],
+                "scheduled_at": scheduled_at.isoformat(),
+                "duration_minutes": 45,
+                "interview_type": "video",
+            },
+        )
+        self.assertEqual(created.status_code, 201, created.text)
+        interview_id = uuid.UUID(created.json()["id"])
+        with self.TestSession() as db:
+            stale = db.scalar(
+                select(Reminder).where(
+                    Reminder.interview_id == interview_id,
+                    Reminder.reminder_type == "24_hour",
+                )
+            )
+            assert stale is not None
+            stale.status = "pending"
+            stale.scheduled_for = datetime.now(timezone.utc) - timedelta(minutes=10)
+            db.commit()
+
+            due = reminder_service.claim_due_reminders(db)
+            self.assertNotIn(stale.id, {reminder.id for reminder in due})
+            db.refresh(stale)
+            self.assertEqual(stale.status, "skipped")
+
+        # Delivered reminders from an interview whose start time has passed are hidden.
+        past_candidate = self.create_candidate(f"past-{uuid.uuid4().hex}@example.com")
+        past_created = self.client.post(
+            "/api/v1/interviews",
+            json={
+                "candidate_id": past_candidate["id"],
+                "scheduled_at": (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(),
+                "duration_minutes": 45,
+                "interview_type": "video",
+            },
+        )
+        self.assertEqual(past_created.status_code, 201, past_created.text)
+        past_id = uuid.UUID(past_created.json()["id"])
+        with self.TestSession() as db:
+            past_reminder = db.scalar(
+                select(Reminder).where(
+                    Reminder.interview_id == past_id,
+                    Reminder.reminder_type == "1_hour",
+                )
+            )
+            assert past_reminder is not None
+            past_reminder.status = "pending"
+            past_reminder.scheduled_for = datetime.now(timezone.utc) - timedelta(hours=2)
+            db.commit()
+
+            due = reminder_service.claim_due_reminders(db)
+            self.assertNotIn(past_reminder.id, {reminder.id for reminder in due})
+            db.refresh(past_reminder)
+            self.assertEqual(past_reminder.status, "skipped")
+
+            # Simulate a legacy delivered row to verify it is still hidden from alerts.
+            past_reminder.status = "delivered"
+            past_reminder.delivered_at = datetime.now(timezone.utc)
+            db.commit()
+
+        active = self.client.get("/api/v1/reminders/due")
+        self.assertEqual(active.status_code, 200, active.text)
+        self.assertFalse(any(item["interview_id"] == str(past_id) for item in active.json()))
 
 
 if __name__ == "__main__":

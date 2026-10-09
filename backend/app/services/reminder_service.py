@@ -1,15 +1,20 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import delete, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy import delete, func, select, update
+from sqlalchemy.orm import Session, aliased
 
+from app.config import settings
 from app.models.candidate import Candidate
 from app.models.interview import Interview
 from app.models.reminder import Reminder
 from app.schemas.reminder import ReminderResponse
 
 # (reminder_type, timedelta before scheduled_at)
+# If the scheduler was unavailable for longer than this, skip stale tiers instead of
+# surprising the user with delayed reminders after a restart.
+REMINDER_DELIVERY_GRACE = timedelta(seconds=max(300, settings.REMINDER_POLL_SECONDS * 2))
+
 REMINDER_OFFSETS: list[tuple[str, timedelta]] = [
     ("24_hour", timedelta(hours=24)),
     ("1_hour", timedelta(hours=1)),
@@ -76,16 +81,49 @@ def _to_response(reminder: Reminder, interview: Interview, candidate: Candidate)
 
 
 def claim_due_reminders(db: Session) -> list[Reminder]:
-    """Called by the scheduler. Atomically claims every 'pending' reminder whose
-    scheduled_for has passed, flips them to 'delivered', and returns them.
-    FOR UPDATE SKIP LOCKED means a second worker process (if one ever exists)
-    can't claim the same row twice — the core duplicate-prevention mechanism."""
+    """Claim only timely reminders for future scheduled interviews.
+
+    Pending reminders are marked skipped when their interview has already started,
+    was made inactive, or the reminder tier is too stale to be useful. This prevents
+    a scheduler restart from delivering a burst of old reminder tiers.
+    """
     now = datetime.now(timezone.utc)
+    stale_cutoff = now - REMINDER_DELIVERY_GRACE
+
+    # These reminders can no longer be useful: the interview is no longer scheduled
+    # or its start time has arrived. Keep the rows for auditability.
+    expired_interview_ids = select(Interview.id).where(
+        (Interview.status != "scheduled") | (Interview.scheduled_at <= now)
+    )
+    db.execute(
+        update(Reminder)
+        .where(Reminder.status == "pending", Reminder.interview_id.in_(expired_interview_ids))
+        .values(status="skipped")
+    )
+
+    # A late tier for an interview that is still upcoming is also skipped once it is
+    # outside the grace window; later tiers can still fire at their intended times.
+    db.execute(
+        update(Reminder)
+        .where(
+            Reminder.status == "pending",
+            Reminder.scheduled_for <= stale_cutoff,
+            Reminder.interview_id.in_(select(Interview.id).where(
+                Interview.status == "scheduled", Interview.scheduled_at > now
+            )),
+        )
+        .values(status="skipped")
+    )
+
     stmt = (
         select(Reminder)
         .join(Interview, Reminder.interview_id == Interview.id)
-        .where(Reminder.status == "pending", Reminder.scheduled_for <= now)
-        .where(Interview.status == "scheduled")
+        .where(
+            Reminder.status == "pending",
+            Reminder.scheduled_for <= now,
+            Interview.status == "scheduled",
+            Interview.scheduled_at > now,
+        )
         .with_for_update(skip_locked=True, of=Reminder)
     )
     due = list(db.execute(stmt).scalars().all())
@@ -96,14 +134,56 @@ def claim_due_reminders(db: Session) -> list[Reminder]:
     return due
 
 
+def _has_newer_delivered_reminder():
+    newer_delivered = aliased(Reminder)
+    return (
+        select(newer_delivered.id)
+        .where(
+            newer_delivered.interview_id == Reminder.interview_id,
+            newer_delivered.status.in_(("delivered", "acknowledged")),
+            newer_delivered.scheduled_for > Reminder.scheduled_for,
+        )
+        .exists()
+    )
+
+
+def count_active_reminders(db: Session, owner_id: uuid.UUID, now: datetime | None = None) -> int:
+    """Count interviews with one current reminder using the same rules as the alert list."""
+    now = now or datetime.now(timezone.utc)
+    stmt = (
+        select(func.count(func.distinct(Interview.id)))
+        .select_from(Reminder)
+        .join(Interview, Reminder.interview_id == Interview.id)
+        .where(
+            Interview.owner_id == owner_id,
+            Interview.status == "scheduled",
+            Interview.scheduled_at > now,
+            Reminder.status == "delivered",
+            Reminder.acknowledged_at.is_(None),
+            ~_has_newer_delivered_reminder(),
+        )
+    )
+    return int(db.execute(stmt).scalar_one())
+
+
 def list_active_reminders(db: Session, owner_id: uuid.UUID) -> list[ReminderResponse]:
-    """Reminders the frontend should currently show: delivered-but-not-yet-acknowledged,
-    scoped to this HR account's own interviews only."""
+    """Return at most the latest delivered, unacknowledged reminder per upcoming
+    scheduled interview, scoped to this HR account. Acknowledging the latest tier
+    must not cause an older tier for the same interview to reappear.
+    """
+    now = datetime.now(timezone.utc)
     stmt = (
         select(Reminder, Interview, Candidate)
         .join(Interview, Reminder.interview_id == Interview.id)
         .join(Candidate, Interview.candidate_id == Candidate.id)
-        .where(Reminder.status == "delivered", Interview.owner_id == owner_id, Interview.status == "scheduled")
+        .where(
+            Reminder.status == "delivered",
+            Reminder.acknowledged_at.is_(None),
+            Interview.owner_id == owner_id,
+            Interview.status == "scheduled",
+            Interview.scheduled_at > now,
+            ~_has_newer_delivered_reminder(),
+        )
         .order_by(Reminder.scheduled_for.asc())
     )
     return [_to_response(r, i, c) for r, i, c in db.execute(stmt).all()]
