@@ -17,20 +17,33 @@ export function useCountdown(isoTimestamp) {
   return label;
 }
 
+
 export function formatCountdown(isoTimestamp) {
   const target = new Date(isoTimestamp).getTime();
-  const now = Date.now();
-  const diffMs = target - now;
 
-  if (diffMs <= 0 && diffMs > -60 * 60 * 1000) return "Starting now";
-  if (diffMs <= -60 * 60 * 1000) return "Completed";
+  if (!Number.isFinite(target)) {
+    return "Time unavailable";
+  }
 
-  const totalMinutes = Math.floor(diffMs / 60_000);
+  const diffMs = target - Date.now();
+
+  if (diffMs <= 0 && diffMs > -60 * 60 * 1000) {
+    return "Starting now";
+  }
+
+  if (diffMs <= -60 * 60 * 1000) {
+    return "Completed";
+  }
+
+  const totalMinutes = Math.ceil(diffMs / 60_000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
-  if (hours > 0) return `In ${hours}h ${String(minutes).padStart(2, "0")}m`;
-  return `In ${minutes}m`;
+  if (hours > 0) {
+    return `In ${hours}h ${String(minutes).padStart(2, "0")}m`;
+  }
+
+  return `In ${totalMinutes}m`;
 }
 
 export function formatLocalDateTime(isoTimestamp) {

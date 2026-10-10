@@ -1,4 +1,4 @@
-/* =========================================================
+﻿/* =========================================================
    MEETWISE PUBLIC DESIGN SYSTEM
    Landing + Login + Register
    ========================================================= */
@@ -730,38 +730,263 @@ button {
    AUTH PANEL
    ========================================================= */
 
+.auth-panel-v2 {
+  padding: 52px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  background: var(--mw-surface);
+}
+
+.auth-panel-header-v2 {
+  margin-bottom: 28px;
+}
+
+.auth-panel-header-v2 h2 {
+  margin: 0 0 8px;
+
+  color: var(--mw-ink);
+
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.auth-panel-header-v2 p {
+  margin: 0;
+
+  color: var(--mw-text-mid);
+
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 
 /* =========================================================
    AUTH FORM
    ========================================================= */
 
+.auth-form-v2 {
+  display: flex;
+  flex-direction: column;
+
+  gap: 17px;
+}
+
+.auth-field-v2 {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.auth-field-v2 label {
+  color: var(--mw-ink-soft);
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
 .auth-field-v2 input,
 .auth-field-v2 select,
+.auth-field-v2 textarea {
+  width: 100%;
+
+  min-height: 46px;
+
+  padding: 0 13px;
+
+  border: 1px solid var(--mw-border-strong);
+
+  border-radius: 10px;
+
+  background: var(--mw-surface);
+
+  color: var(--mw-text);
+
+  outline: none;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-field-v2 textarea {
+  padding-top: 12px;
+  padding-bottom: 12px;
+
+  min-height: 100px;
+
+  resize: vertical;
+}
 
 .auth-field-v2 input::placeholder,
+.auth-field-v2 textarea::placeholder {
+  color: #9aa49f;
+}
 
 .auth-field-v2 input:focus,
 .auth-field-v2 select:focus,
+.auth-field-v2 textarea:focus {
+  border-color: var(--mw-accent-dark);
+
+  box-shadow:
+    0 0 0 3px rgba(165, 232, 194, 0.28);
+}
 
 
 /* =========================================================
    AUTH BUTTON
    ========================================================= */
 
+.auth-submit-v2 {
+  width: 100%;
+
+  min-height: 47px;
+
+  margin-top: 4px;
+
+  border: 1px solid var(--mw-ink);
+
+  border-radius: 10px;
+
+  background: var(--mw-ink);
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-submit-v2:hover {
+  background: var(--mw-ink-soft);
+
+  transform: translateY(-1px);
+
+  box-shadow: var(--mw-shadow);
+}
+
+.auth-submit-v2:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.55;
+
+  transform: none;
+}
+
 
 /* =========================================================
    AUTH MESSAGES
    ========================================================= */
+
+.auth-error-v2 {
+  padding: 11px 13px;
+
+  border: 1px solid #f0c8c8;
+
+  border-radius: 9px;
+
+  background: var(--mw-danger-soft);
+
+  color: var(--mw-danger);
+
+  font-size: 12px;
+
+  line-height: 1.45;
+}
+
+.auth-success-v2 {
+  padding: 11px 13px;
+
+  border: 1px solid #c7e7d3;
+
+  border-radius: 9px;
+
+  background: var(--mw-accent-soft);
+
+  color: var(--mw-accent-dark);
+
+  font-size: 12px;
+
+  line-height: 1.45;
+}
 
 
 /* =========================================================
    OTP
    ========================================================= */
 
+.auth-otp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-top: 2px;
+}
+
+.auth-link-button {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--mw-accent-dark);
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.auth-link-button:hover {
+  text-decoration: underline;
+}
+
+.auth-otp-input {
+  text-align: center;
+
+  letter-spacing: 0.35em;
+
+  font-size: 20px !important;
+  font-weight: 700;
+}
+
 
 /* =========================================================
    AUTH BOTTOM LINK
    ========================================================= */
+
+.auth-bottom-v2 {
+  margin-top: 24px;
+
+  text-align: center;
+
+  color: var(--mw-text-low);
+
+  font-size: 12px;
+}
+
+.auth-bottom-v2 a {
+  color: var(--mw-accent-dark);
+
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+.auth-bottom-v2 a:hover {
+  text-decoration: underline;
+}
 
 
 /* =========================================================
@@ -998,7 +1223,7 @@ button {
   }
 }
 /* =========================================
-   LANDING BRAND — MATCH WORKSPACE LOGO
+   LANDING BRAND â€” MATCH WORKSPACE LOGO
    ========================================= */
 
 .landing-brand {
